@@ -1,5 +1,7 @@
 import { getOpenClawCompatibilityConfig, resolveApiBaseUrl } from "@/lib/openclaw-compat";
 import type {
+  OpenClawChatMessage,
+  OpenClawChatSession,
   OpenClawDailyBrief,
   OpenClawJobHistoryEntry,
   OpenClawOutput,
@@ -80,21 +82,8 @@ export type Connection = {
   note: string;
 };
 
-export type ChatSession = {
-  id: string;
-  title: string;
-  channel: string;
-  updatedAt: string;
-  activity: "active" | "waiting" | "complete" | string;
-};
-
-export type ChatMessage = {
-  id: string;
-  sessionId: string;
-  role: "assistant" | "user";
-  text: string;
-  time: string;
-};
+export type ChatSession = OpenClawChatSession;
+export type ChatMessage = OpenClawChatMessage;
 
 export type StatusSnapshotItem = {
   label: string;
@@ -337,6 +326,17 @@ export function fetchChatSessions() {
 export function fetchChatMessages(sessionId: string) {
   const path = resolveChatMessagesPath(sessionId);
   return openClawFetch<ChatMessage[]>(path);
+}
+
+export function sendChatMessage(sessionId: string, content: string) {
+  const path = resolveChatMessagesPath(sessionId);
+  return openClawRequest<OpenClawChatMessage>(path, {
+    method: "POST",
+    body: {
+      role: "user",
+      content,
+    },
+  });
 }
 
 export function fetchStatusSnapshot() {

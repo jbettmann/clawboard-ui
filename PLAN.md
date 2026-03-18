@@ -102,11 +102,11 @@
 - [x] Validation run (`npm run lint`, `npm run build`)
 
 ### Phase 6
-- [ ] Outputs and daily briefs wired to live data
-- [ ] Output types clearly distinguished in UI
-- [ ] Chat/activity rebuilt around real sessions and history
-- [ ] Real send/execution flow connected where supported safely
-- [ ] Validation run (`npm run lint`, `npm run build`)
+- [x] Outputs and daily briefs wired to live data
+- [x] Output types clearly distinguished in UI
+- [x] Chat/activity rebuilt around real sessions and history
+- [x] Real send/execution flow connected where supported safely
+- [x] Validation run (`npm run lint`, `npm run build`)
 
 ### Phase 7
 - [ ] Real runtime health/status replaces env-only views
@@ -148,9 +148,13 @@ The repository has now been re-audited for the Phase 1–4 reset and patched to 
 - Reset cleanup validation completed with successful `npm run lint` and `npm run build`.
 - Phase 5 skills and jobs product-surface work completed with stronger live inventory/scheduler detail, run-history visibility, and improved hierarchy.
 - Validation completed for Phase 5 with successful `npm run lint` and `npm run build`.
+- Phase 6 outputs/briefs/chat work completed with real daily brief coverage, clearer agent-output distinctions, and live chat send/history integration.
+- Validation completed for Phase 6 with successful `npm run lint` and `npm run build`.
+- Reset audit for Phases 1–6 completed and cleanup changes applied to close the missing implementation gaps discovered during the audit.
+- Reset cleanup validation for Phases 1–6 completed with successful `npm run lint` and `npm run build`.
 
 ### Now
-- Phase 5 is ready to be committed, pushed, and opened as a PR for review.
+- The Phase 1–6 reset cleanup block is ready to be committed, pushed, and opened as a PR for review.
 
 ### Next
-- Wait for approval and merge of the Phase 5 PR, then re-read `PLAN.md` and begin Phase 6 only after merge.
+- Wait for approval and merge of the Phase 1–6 reset cleanup PR, then re-read `PLAN.md` and begin Phase 7 only after merge.
