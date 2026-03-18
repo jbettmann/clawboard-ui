@@ -88,11 +88,11 @@
 - [x] Validation run (`npm run lint`, `npm run build`)
 
 ### Phase 4
-- [ ] Home redesigned around real user context and next actions
-- [ ] Real live-data sections replace demo cards
-- [ ] Internal/dev-facing framing removed
-- [ ] Empty states for new users implemented without mock filler
-- [ ] Validation run (`npm run lint`, `npm run build`)
+- [x] Home redesigned around real user context and next actions
+- [x] Real live-data sections replace demo cards
+- [x] Internal/dev-facing framing removed
+- [x] Empty states for new users implemented without mock filler
+- [x] Validation run (`npm run lint`, `npm run build`)
 
 ### Phase 5
 - [ ] Skills rebuilt around real inventory and status
@@ -143,9 +143,11 @@ The existing repository now has a refreshed Next.js/Tailwind dashboard shell wit
 - Validation completed for Phase 2 with successful `npm run lint` and `npm run build`.
 - Phase 3 real-data foundation completed with a shared OpenClaw client, typed domain models, async data primitives, and read-only live wiring across dashboard surfaces.
 - Validation completed for Phase 3 with successful `npm run lint` and `npm run build`.
+- Phase 4 home redesign completed around real user context, attention signals, and clear next actions using the live-data foundation.
+- Validation completed for Phase 4 with successful `npm run lint` and `npm run build`.
 
 ### Now
-- Phase 3 is ready to be committed, pushed, and opened as a PR for review.
+- Phase 4 is ready to be committed, pushed, and opened as a PR for review.
 
 ### Next
-- Wait for approval and merge of the Phase 3 PR, then re-read `PLAN.md` and begin Phase 4 only after merge.
+- Wait for approval and merge of the Phase 4 PR, then re-read `PLAN.md` and begin Phase 5 only after merge.
