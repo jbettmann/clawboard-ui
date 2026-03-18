@@ -126,12 +126,12 @@
 
 ## Current State
 
-The repository has now been re-audited for the Phase 1–4 reset and patched to close the most important gaps that were still preventing those phases from being truly complete:
+The repository has now been re-audited for the Phase 1–6 reset and patched to close the most important gaps that were still preventing those phases from being truly complete:
 
 - The shell remains full-width, theme-aware, and sidebar-led, with the shared foundation from Phases 1–2 intact.
 - Home remains redesigned around live context, attention, and next actions.
-- Additional Phase 1–4 cleanup work has now removed more remaining fake/demo read-path behavior by wiring chat, connections, status/history, and output state handling more directly to live OpenClaw reads.
-- The app still needs the later planned product-surface work in Phases 5+ for richer detail, write flows, and deeper model distinctions, but the reset cleanup PR is focused on making Phases 1–4 honestly closer to their stated delivery.
+- Additional reset cleanup work has removed remaining fake/demo read-path behavior by wiring outputs, briefs, chat history, and chat send behavior more directly to live OpenClaw reads.
+- The app still needs the later planned observability and polish work in Phases 7–8, but the reset cleanup PR is focused on making Phases 1–6 honestly match their stated delivery.
 
 ### Done
 - New multi-phase redesign + live-data migration plan approved.
@@ -148,11 +148,13 @@ The repository has now been re-audited for the Phase 1–4 reset and patched to 
 - Reset cleanup validation completed with successful `npm run lint` and `npm run build`.
 - Phase 5 skills and jobs product-surface work completed with stronger live inventory/scheduler detail, run-history visibility, and improved hierarchy.
 - Validation completed for Phase 5 with successful `npm run lint` and `npm run build`.
-- Phase 6 outputs/briefs/chat work completed with richer live message history, safer send integration, and clearer output/brief distinctions.
+- Phase 6 outputs/briefs/chat work completed with real daily brief coverage, clearer agent-output distinctions, and live chat send/history integration.
 - Validation completed for Phase 6 with successful `npm run lint` and `npm run build`.
+- Reset audit for Phases 1–6 completed and cleanup changes applied to close the missing implementation gaps discovered during the audit.
+- Reset cleanup validation for Phases 1–6 completed with successful `npm run lint` and `npm run build`.
 
 ### Now
-- Phase 6 is ready to be committed, pushed, and opened as a PR for review.
+- The Phase 1–6 reset cleanup block is ready to be merged after conflict resolution.
 
 ### Next
-- Wait for approval and merge of the Phase 6 PR, then re-read `PLAN.md` and begin Phase 7 only after merge.
+- After the Phase 1–6 reset cleanup PR is merged, re-read `PLAN.md` and begin Phase 7.

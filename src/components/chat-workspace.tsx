@@ -62,10 +62,8 @@ function activityLabel(activity: ChatSessionActivity) {
 function formatTimestamp(value?: string) {
   if (!value) return "—";
   const parsed = Date.parse(value);
-  if (!Number.isNaN(parsed)) {
-    return new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit" }).format(parsed);
-  }
-  return value;
+  if (Number.isNaN(parsed)) return value;
+  return new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit" }).format(parsed);
 }
 
 function formatDate(value?: string) {
@@ -319,9 +317,7 @@ export function ChatWorkspace() {
                   {metadataRows.map((row) => (
                     <div key={`${selectedSession?.id ?? "session"}-${row.label}`} className="space-y-1">
                       <p className="text-[11px] text-zinc-500 uppercase tracking-[0.3em] dark:text-zinc-400">{row.label}</p>
-                      <p className="text-sm text-zinc-900 dark:text-zinc-100">
-                        {metadataValue(row.value)}
-                      </p>
+                      <p className="text-sm text-zinc-900 dark:text-zinc-100">{metadataValue(row.value)}</p>
                     </div>
                   ))}
                 </div>

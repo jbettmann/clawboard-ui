@@ -1,14 +1,29 @@
 "use client";
 
+import { useMemo } from "react";
 import type { LucideIcon } from "lucide-react";
-import { Bookmark, BookmarkCheck, MessageCircle, Pin, PinOff, ShieldCheck, Sparkles, Wrench } from "lucide-react";
+import {
+  Bookmark,
+  BookmarkCheck,
+  MessageCircle,
+  Pin,
+  PinOff,
+  ShieldCheck,
+  Sparkles,
+  Wrench,
+} from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState, ErrorState, LoadingState } from "@/components/ui/async-states";
 import { PageHeader } from "@/components/page-header";
-import { fetchDailyBriefs, type DailyBrief, type OutputKind } from "@/lib/openclaw-client";
+import {
+  fetchDailyBriefs,
+  type DailyBrief,
+  type OutputItem,
+  type OutputKind,
+} from "@/lib/openclaw-client";
 import { useClawboardState } from "@/lib/clawboard-state";
 import { useOpenClawResource } from "@/hooks/use-openclaw-resource";
 
@@ -30,6 +45,27 @@ function renderKindBadge(kind: OutputKind) {
   );
 }
 
+function isAgentOutput(output: OutputItem) {
+  const source = (output.source ?? "").toLowerCase();
+  return (
+    Boolean(output.metadata?.agentId) ||
+    Boolean(output.metadata?.agentName) ||
+    source.includes("agent")
+  );
+}
+
+function renderSourceBadge(source?: string) {
+  if (!source) {
+    return null;
+  }
+  const trimmed = source.split("/").pop() ?? source;
+  return (
+    <Badge variant="muted" className="text-[0.6rem] uppercase tracking-[0.3em]">
+      {trimmed}
+    </Badge>
+  );
+}
+
 function formatBriefDate(value?: string) {
   if (!value) return "—";
   const parsed = Date.parse(value);
@@ -44,6 +80,7 @@ export function OutputsManagement() {
     setSelectedOutputId,
     toggleOutputPinned,
     toggleOutputSaved,
+    refreshOutputs,
   } = useClawboardState();
 
   const {
@@ -57,6 +94,28 @@ export function OutputsManagement() {
   const latestBrief = dailyBriefs[0];
 
   const selectedOutput = outputs.find((item) => item.id === selectedOutputId) ?? outputs[0];
+
+  const kindCounts = useMemo(() => {
+    const counts: Record<OutputKind, number> = {
+      "daily-brief": 0,
+      job: 0,
+      chat: 0,
+      system: 0,
+      manual: 0,
+    };
+    outputs.forEach((output) => {
+      counts[output.kind] = (counts[output.kind] ?? 0) + 1;
+    });
+    return counts;
+  }, [outputs]);
+
+  const feedOutputs = useMemo(
+    () => outputs.filter((output) => output.kind !== "daily-brief"),
+    [outputs],
+  );
+
+  const agentOutputs = useMemo(() => outputs.filter((output) => isAgentOutput(output)), [outputs]);
+  const agentHighlights = agentOutputs.slice(0, 3);
 
   if (!selectedOutput) {
     return (
@@ -93,8 +152,25 @@ export function OutputsManagement() {
         context="Review finished briefs, pin the useful ones, and keep clean detail views."
         supportingStatus={
           <>
-            <Badge variant="muted">{selectedOutput.source}</Badge>
+            {selectedOutput.source ? (
+              <Badge variant="muted">{selectedOutput.source}</Badge>
+            ) : null}
             {renderKindBadge(selectedOutput.kind)}
+            {isAgentOutput(selectedOutput) ? (
+              <Badge className="bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-200">
+                Agent output
+              </Badge>
+            ) : null}
+            {selectedOutput.relatedJobId ? (
+              <Badge variant="muted" className="text-[0.6rem] uppercase tracking-[0.3em]">
+                Job {selectedOutput.relatedJobId}
+              </Badge>
+            ) : null}
+            {selectedOutput.relatedSessionId ? (
+              <Badge variant="muted" className="text-[0.6rem] uppercase tracking-[0.3em]">
+                Session {selectedOutput.relatedSessionId}
+              </Badge>
+            ) : null}
             {selectedOutput.pinned ? <Badge>Pinned</Badge> : null}
             {selectedOutput.saved ? <Badge variant="muted">Saved</Badge> : null}
           </>
@@ -109,49 +185,120 @@ export function OutputsManagement() {
 
       <div className="grid gap-5 lg:grid-cols-[340px_1fr]">
         <Card>
-          <CardHeader>
-            <CardTitle>Output feed</CardTitle>
-            <CardDescription>Most recent and high-value outputs in one calm list.</CardDescription>
+          <CardHeader className="flex items-center justify-between gap-4">
+            <div>
+              <CardTitle>Output feed</CardTitle>
+              <CardDescription>Most recent and high-value outputs in one calm list.</CardDescription>
+            </div>
+            <Button variant="ghost" size="sm" onClick={refreshOutputs}>
+              Refresh outputs
+            </Button>
           </CardHeader>
           <CardContent className="space-y-3">
-            {outputs.map((output) => (
-              <button
-                key={output.id}
-                type="button"
-                onClick={() => setSelectedOutputId(output.id)}
-                aria-pressed={selectedOutput.id === output.id}
-                aria-label={`Open output ${output.title}`}
-                className={`w-full rounded-xl border p-4 text-left transition-colors ${
-                  selectedOutput.id === output.id
-                    ? "border-zinc-900 bg-zinc-900 text-zinc-50 dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900"
-                    : "border-zinc-200 bg-zinc-50 hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:bg-zinc-800"
-                }`}
-              >
-                <div className="flex items-start justify-between gap-2">
-                <p className="text-base font-semibold">{output.title}</p>
-                <span className="text-xs opacity-80">{output.updatedAt}</span>
-              </div>
-                <p className="mt-1 text-sm opacity-85">{output.summary ?? "No summary available."}</p>
-                <div className="mt-3 flex flex-wrap items-center gap-2">
-                  {renderKindBadge(output.kind)}
-                  {output.pinned ? <Badge>Pinned</Badge> : null}
-                  {output.saved ? <Badge variant="muted">Saved</Badge> : null}
-                </div>
-              </button>
-            ))}
+            <div className="flex flex-wrap gap-2 pb-2">
+              {Object.entries(kindCounts).map(([kind, count]) => {
+                const meta = KIND_METADATA[kind as OutputKind];
+                return (
+                  <Badge
+                    key={kind}
+                    variant={count ? "default" : "muted"}
+                    className="text-[0.55rem] uppercase tracking-[0.35em]"
+                  >
+                    {meta.label} {count}
+                  </Badge>
+                );
+              })}
+            </div>
+            {feedOutputs.length ? (
+              feedOutputs.map((output) => {
+                const isActive = selectedOutput.id === output.id;
+                return (
+                  <button
+                    key={output.id}
+                    type="button"
+                    onClick={() => setSelectedOutputId(output.id)}
+                    aria-pressed={isActive}
+                    aria-label={`Open output ${output.title}`}
+                    className={`w-full rounded-xl border p-4 text-left transition-colors ${
+                      isActive
+                        ? "border-zinc-900 bg-zinc-900 text-zinc-50 dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900"
+                        : "border-zinc-200 bg-zinc-50 hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:bg-zinc-800"
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="text-base font-semibold">{output.title}</p>
+                      <span className="text-xs opacity-80">{output.updatedAt}</span>
+                    </div>
+                    <p className="mt-1 text-sm opacity-85">{output.summary ?? "No summary available."}</p>
+                    <div className="mt-3 flex flex-wrap items-center gap-2">
+                      {renderKindBadge(output.kind)}
+                      {renderSourceBadge(output.source)}
+                      {isAgentOutput(output) ? (
+                        <Badge className="bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-200">
+                          Agent output
+                        </Badge>
+                      ) : null}
+                      {output.relatedJobId ? (
+                        <Badge variant="muted" className="text-[0.6rem] uppercase tracking-[0.3em]">
+                          Job {output.relatedJobId}
+                        </Badge>
+                      ) : null}
+                      {output.relatedSessionId ? (
+                        <Badge variant="muted" className="text-[0.6rem] uppercase tracking-[0.3em]">
+                          Session {output.relatedSessionId}
+                        </Badge>
+                      ) : null}
+                      {output.pinned ? <Badge>Pinned</Badge> : null}
+                      {output.saved ? <Badge variant="muted">Saved</Badge> : null}
+                    </div>
+                  </button>
+                );
+              })
+            ) : (
+              <EmptyState
+                title="No job or chat outputs yet"
+                description="Only daily briefs are available until automation runs finish."
+                action={
+                  <Button variant="ghost" onClick={refreshOutputs}>
+                    Refresh outputs
+                  </Button>
+                }
+              />
+            )}
           </CardContent>
         </Card>
 
         <Card>
-        <CardHeader>
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="muted">Detail view</Badge>
-            <Badge className="bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200">{selectedOutput.source}</Badge>
-          </div>
-          <CardTitle className="mt-3 text-2xl">{selectedOutput.title}</CardTitle>
-          <CardDescription className="text-base">Updated {selectedOutput.updatedAt}</CardDescription>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">Created {selectedOutput.createdAt ?? "—"}</p>
-        </CardHeader>
+          <CardHeader>
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant="muted">Detail view</Badge>
+              {selectedOutput.source ? (
+                <Badge className="bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200">
+                  {selectedOutput.source}
+                </Badge>
+              ) : null}
+              {isAgentOutput(selectedOutput) ? (
+                <Badge className="bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-200">
+                  Agent output
+                </Badge>
+              ) : null}
+              {selectedOutput.relatedJobId ? (
+                <Badge variant="muted" className="text-[0.6rem] uppercase tracking-[0.3em]">
+                  Job {selectedOutput.relatedJobId}
+                </Badge>
+              ) : null}
+              {selectedOutput.relatedSessionId ? (
+                <Badge variant="muted" className="text-[0.6rem] uppercase tracking-[0.3em]">
+                  Session {selectedOutput.relatedSessionId}
+                </Badge>
+              ) : null}
+            </div>
+            <CardTitle className="mt-3 text-2xl">{selectedOutput.title}</CardTitle>
+            <CardDescription className="text-base">Updated {selectedOutput.updatedAt}</CardDescription>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400">
+              Created {selectedOutput.createdAt ?? "—"}
+            </p>
+          </CardHeader>
           <CardContent className="space-y-4">
             <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900">
               <p className="text-sm leading-7 text-zinc-700 dark:text-zinc-300">{selectedOutput.body}</p>
@@ -184,6 +331,66 @@ export function OutputsManagement() {
           </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader className="flex flex-col gap-2">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <Sparkles className="size-4 text-zinc-500" />
+              <CardTitle className="m-0">Agent outputs</CardTitle>
+            </div>
+            <Badge variant="muted">{agentOutputs.length} tracked</Badge>
+          </div>
+          <CardDescription>Highlights from automation agents and assistants.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {agentHighlights.length ? (
+            agentHighlights.map((output) => {
+              const isActive = selectedOutput.id === output.id;
+              return (
+                <button
+                  key={output.id}
+                  type="button"
+                  onClick={() => setSelectedOutputId(output.id)}
+                  aria-pressed={isActive}
+                  className={`w-full rounded-xl border px-4 py-3 text-left transition-colors ${
+                    isActive
+                      ? "border-zinc-900 bg-zinc-900 text-zinc-50 dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900"
+                      : "border-zinc-200 bg-zinc-50 hover:border-zinc-300 hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700 dark:hover:bg-zinc-800"
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-base font-semibold">{output.title}</p>
+                    <Badge className="text-[0.6rem] uppercase tracking-[0.3em]">
+                      Agent
+                    </Badge>
+                  </div>
+                  <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+                    {output.summary ?? "Agent result"}
+                  </p>
+                  <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
+                    {renderSourceBadge(output.source)}
+                    {output.relatedJobId ? (
+                      <Badge variant="muted" className="text-[0.55rem] uppercase tracking-[0.3em]">
+                        Job {output.relatedJobId}
+                      </Badge>
+                    ) : null}
+                    {output.relatedSessionId ? (
+                      <Badge variant="muted" className="text-[0.55rem] uppercase tracking-[0.3em]">
+                        Session {output.relatedSessionId}
+                      </Badge>
+                    ) : null}
+                  </div>
+                </button>
+              );
+            })
+          ) : (
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">
+              Agent outputs will appear here once automation runs publish new results.
+            </p>
+          )}
+        </CardContent>
+      </Card>
 
       <div className="grid gap-5 lg:grid-cols-2">
         <Card>

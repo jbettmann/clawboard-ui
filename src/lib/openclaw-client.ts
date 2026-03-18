@@ -449,9 +449,7 @@ export function fetchConnections() {
 
 export function fetchChatSessions() {
   return openClawFetch<OpenClawChatSession[]>(ENDPOINTS.chatSessions).then((items) =>
-    items
-      .map(mapChatSession)
-      .sort((a, b) => parseTimestamp(b.updatedAt) - parseTimestamp(a.updatedAt)),
+    items.map(mapChatSession).sort((a, b) => parseTimestamp(b.updatedAt) - parseTimestamp(a.updatedAt)),
   );
 }
 
