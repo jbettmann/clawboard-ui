@@ -1,4 +1,4 @@
-# Clawboard UI – Product Plan (Phases 1–6)
+# Clawboard UI – Product Plan (Phases 1–7)
 
 ## Approved Plan
 
@@ -50,6 +50,13 @@
 3. Document explicit rollback steps to return to the stock UI quickly.
 4. Expose compatibility configuration in UI for easy operator verification.
 5. Preserve buildability and validation confidence after compatibility additions.
+
+### Phase 7 — Packaging + Non-Technical Installability
+1. Add practical Docker packaging suitable for local/prod-style startup.
+2. Provide plain-language setup/install instructions for non-technical operators.
+3. Make development vs production run paths explicit and easy to follow.
+4. Clarify environment setup and where users should edit configuration.
+5. Preserve buildability and validation confidence after packaging/docs updates.
 
 ## Checklist Status
 
@@ -103,9 +110,17 @@
 - [x] README updated with Phase 6 compatibility guidance and pointers
 - [x] Validation rerun after Phase 6 additions (`npm run lint`, `npm run build`)
 
+### Phase 7
+- [x] Production-ready Docker packaging added (`Dockerfile`, `.dockerignore`)
+- [x] Docker run workflow added for one-command startup (`docker-compose.yml`)
+- [x] Plain-language setup guide added for non-technical users (`docs/INSTALL_SETUP.md`)
+- [x] README updated with clear local/dev/prod/docker run paths and env setup
+- [x] Next.js standalone output enabled for lean runtime packaging (`next.config.ts`)
+- [x] Validation rerun after Phase 7 updates (`npm run lint`, `npm run build`)
+
 ## Current State
 
-The repository now contains working product surfaces for Home, Chat, Skills, Jobs, Outputs, Connections, Settings/Advanced status views, plus Phase 6 compatibility scaffolding for OpenClaw drop-in UI replacement:
+The repository now contains working product surfaces for Home, Chat, Skills, Jobs, Outputs, Connections, Settings/Advanced status views, plus Phase 6 compatibility scaffolding and Phase 7 packaging/install improvements for OpenClaw drop-in UI replacement:
 
 - **Home (Phases 2 + 4):** Day-start dashboard with morning brief, status pulse, active jobs, pinned outputs, quick actions, and a simple customization surface for widget visibility/order.
 - **Chat (Phase 5):** Session-oriented conversation workspace with readable message layout, clear activity states, and simple composer behavior.
@@ -116,8 +131,11 @@ The repository now contains working product surfaces for Home, Chat, Skills, Job
 - **Status & history (Phase 5):** Glanceable health snapshot, friendly activity timeline, and concise log digest in Advanced Settings.
 - **Compatibility (Phase 6):** Dedicated OpenClaw compatibility layer (`src/lib/openclaw-compat.ts`) defines gateway/API/auth/base URL assumptions and supports drop-in vs standalone UI mode.
 - **Integration docs (Phase 6):** `docs/OPENCLAW_COMPATIBILITY.md` documents wiring map, switch-over steps, and rollback to stock UI.
+- **Packaging (Phase 7):** Multi-stage container packaging added via `Dockerfile` and `.dockerignore`, with Next.js standalone output for lean runtime startup.
+- **Installability (Phase 7):** One-command Docker startup path documented and configured in `docker-compose.yml`.
+- **Operator docs (Phase 7):** `docs/INSTALL_SETUP.md` provides plain-language setup and troubleshooting for non-technical users.
 - **Design posture:** Surfaces use calm spacing, high-contrast typography, plain language, and larger touch targets to remain intuitive and elderly-friendly.
 - **State model:** Shared client state provider keeps outputs and Home customization aligned, while Phase 5 surfaces use focused local interaction state for clarity.
-- **Buildability:** Lint and production build pass after Phase 6 compatibility implementation.
+- **Buildability:** Lint and production build pass after Phase 7 packaging/install updates.
 
-Phase 1, Phase 2, Phase 3, Phase 4, Phase 5, and Phase 6 are complete and validated.
+Phase 1, Phase 2, Phase 3, Phase 4, Phase 5, Phase 6, and Phase 7 are complete and validated.

@@ -1,6 +1,6 @@
 # Clawboard UI
 
-Phase 1 frontend foundation for Clawboard.
+Phase 1–7 frontend foundation for Clawboard.
 
 ## Stack
 
@@ -20,16 +20,41 @@ Phase 1 frontend foundation for Clawboard.
 - `/settings`
 - `/settings/advanced`
 
-## Getting Started
+## Quick Start (Local)
 
 ```bash
 npm install
+cp .env.example .env.local
 npm run dev
 ```
 
 Open http://localhost:3000.
 
-## Environment
+## Production Run Path (Local)
+
+```bash
+npm run build
+npm run start
+```
+
+## Docker Run Path (Phase 7)
+
+### Build and run
+
+```bash
+cp .env.example .env.local
+docker compose up -d --build
+```
+
+Open http://localhost:3000.
+
+### Stop
+
+```bash
+docker compose down
+```
+
+## Environment Setup
 
 Copy `.env.example` to `.env.local` and adjust values as needed:
 
@@ -37,7 +62,17 @@ Copy `.env.example` to `.env.local` and adjust values as needed:
 cp .env.example .env.local
 ```
 
+Most important environment keys:
+
+- `NEXT_PUBLIC_OPENCLAW_UI_MODE`
+- `NEXT_PUBLIC_OPENCLAW_GATEWAY_URL`
+- `NEXT_PUBLIC_OPENCLAW_API_BASE_URL`
+- `NEXT_PUBLIC_OPENCLAW_AUTH_MODE`
+- `NEXT_PUBLIC_OPENCLAW_STOCK_UI_URL`
+
 Compatibility-specific settings for OpenClaw gateway/API/auth are documented in `docs/OPENCLAW_COMPATIBILITY.md`.
+
+For plain-language setup instructions, see `docs/INSTALL_SETUP.md`.
 
 ## Scripts
 
@@ -53,6 +88,13 @@ npm run start  # run production build
 - See `docs/OPENCLAW_COMPATIBILITY.md` for the wiring map, assumptions, switch-over steps, and rollback steps.
 - Compatibility layer lives at `src/lib/openclaw-compat.ts`.
 - `Connections` UI now includes a live compatibility snapshot (gateway/API/auth mode) based on env vars.
+
+## Packaging & Installability (Phase 7)
+
+- Multi-stage Docker build for production image (`Dockerfile`)
+- One-command local container startup (`docker-compose.yml`)
+- Standalone Next.js build output enabled (`next.config.ts`)
+- Non-technical setup guide added (`docs/INSTALL_SETUP.md`)
 
 ## UI Foundation Notes
 
