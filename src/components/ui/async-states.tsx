@@ -26,10 +26,10 @@ type ErrorStateProps = BaseStateProps & {
 
 export function ErrorState({ title, description, action }: ErrorStateProps) {
   return (
-    <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-rose-200 bg-rose-50 px-6 py-8 text-center text-rose-700">
-      <Sparkles className="size-6 text-rose-500" />
-      <p className="text-lg font-semibold text-rose-900">{title ?? "We hit a snag"}</p>
-      {description ? <p className="text-sm text-rose-800">{description}</p> : null}
+    <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-[var(--color-accent-border)] bg-[var(--color-accent-muted)] px-6 py-8 text-center text-[var(--color-accent-foreground)]">
+      <Sparkles className="size-6 text-[var(--color-accent-primary)]" />
+      <p className="text-lg font-semibold text-[var(--color-text-strong)]">{title ?? "We hit a snag"}</p>
+      {description ? <p className="text-sm text-[var(--color-text-muted)]">{description}</p> : null}
       {action}
     </div>
   );

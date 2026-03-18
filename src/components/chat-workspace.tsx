@@ -1,157 +1,140 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
-import { Activity, ArrowRight, BotMessageSquare, Clock3, Send, UserRound } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Activity, ArrowRight, BotMessageSquare, Clock3, UserRound } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState, ErrorState, LoadingState } from "@/components/ui/async-states";
 import { PageHeader } from "@/components/page-header";
+import { fetchChatMessages, fetchChatSessions, type ChatMessage, type ChatSession } from "@/lib/openclaw-client";
+import { useOpenClawResource } from "@/hooks/use-openclaw-resource";
 
-type ChatSession = {
-  id: string;
-  title: string;
-  channel: string;
-  updatedAt: string;
-  activity: "active" | "waiting" | "complete";
-};
-
-type ChatMessage = {
-  id: string;
-  sessionId: string;
-  role: "assistant" | "user";
-  text: string;
-  time: string;
-};
-
-const sessions: ChatSession[] = [
-  {
-    id: "morning-checkin",
-    title: "Morning check-in",
-    channel: "Direct chat",
-    updatedAt: "2 min ago",
-    activity: "active",
-  },
-  {
-    id: "node-help",
-    title: "Node reconnect help",
-    channel: "Support thread",
-    updatedAt: "18 min ago",
-    activity: "waiting",
-  },
-  {
-    id: "daily-wrap",
-    title: "Daily wrap draft",
-    channel: "Saved draft",
-    updatedAt: "Yesterday",
-    activity: "complete",
-  },
-];
-
-const initialMessages: ChatMessage[] = [
-  {
-    id: "m-1",
-    sessionId: "morning-checkin",
-    role: "assistant",
-    text: "Good morning, Jordan. I can walk through priorities, connections, and quick actions in one calm pass.",
-    time: "07:28",
-  },
-  {
-    id: "m-2",
-    sessionId: "morning-checkin",
-    role: "user",
-    text: "Start with priorities and tell me if anything looks stuck.",
-    time: "07:29",
-  },
-  {
-    id: "m-3",
-    sessionId: "morning-checkin",
-    role: "assistant",
-    text: "You have two high-value priorities: investment radar review and one node reconnect follow-up. Nothing is critical, but one connection health check is still pending.",
-    time: "07:30",
-  },
-  {
-    id: "m-4",
-    sessionId: "node-help",
-    role: "assistant",
-    text: "Connection helper is open. I can guide re-pairing step by step when you're ready.",
-    time: "07:10",
-  },
-  {
-    id: "m-5",
-    sessionId: "daily-wrap",
-    role: "assistant",
-    text: "Daily wrap draft is complete. Would you like a shorter version before sending tonight?",
-    time: "Yesterday",
-  },
-];
-
-function activityBadge(tone: ChatSession["activity"]) {
-  if (tone === "active")
+function activityBadge(activity: ChatSession["activity"]) {
+  if (activity === "active") {
     return <Badge className="bg-[var(--color-state-good)] text-[var(--color-surface-card)]">Active now</Badge>;
-  if (tone === "waiting")
+  }
+  if (activity === "waiting") {
     return <Badge className="bg-[var(--color-state-watch)] text-[var(--color-surface-card)]">Waiting</Badge>;
+  }
   return <Badge variant="muted">Complete</Badge>;
 }
 
-export function ChatWorkspace() {
-  const [selectedSessionId, setSelectedSessionId] = useState<string>(sessions[0].id);
-  const [composerText, setComposerText] = useState<string>("");
-  const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
-  const composerRef = useRef<HTMLTextAreaElement | null>(null);
+function activityLabel(activity: ChatSession["activity"]) {
+  if (activity === "active") return "In progress";
+  if (activity === "waiting") return "Waiting on reply";
+  if (activity === "complete") return "Complete";
+  return "In progress";
+}
 
-  const selectedSession = sessions.find((session) => session.id === selectedSessionId) ?? sessions[0];
-  const sessionMessages = useMemo(
-    () => messages.filter((message) => message.sessionId === selectedSession.id),
-    [messages, selectedSession.id],
+function formatTimestamp(value: string) {
+  const parsed = Date.parse(value);
+  if (!Number.isNaN(parsed)) {
+    return new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit" }).format(parsed);
+  }
+  return value;
+}
+
+export function ChatWorkspace() {
+  const {
+    status: sessionsStatus,
+    data: sessionsData,
+    error: sessionsError,
+    refresh: refreshSessions,
+  } = useOpenClawResource<ChatSession[]>(fetchChatSessions, []);
+  const sessions = useMemo(() => sessionsData ?? [], [sessionsData]);
+  const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
+
+  const activeSessionId = selectedSessionId ?? sessions[0]?.id ?? null;
+  const selectedSession = sessions.find((session) => session.id === activeSessionId) ?? sessions[0] ?? null;
+
+  const {
+    status: messagesStatus,
+    data: messagesData,
+    error: messagesError,
+    refresh: refreshMessages,
+  } = useOpenClawResource<ChatMessage[]>(
+    () => (selectedSession ? fetchChatMessages(selectedSession.id) : Promise.resolve([])),
+    [selectedSession?.id],
   );
 
-  function focusComposer() {
-    composerRef.current?.focus();
+  const sessionMessages = messagesData ?? [];
+
+  const header = (
+    <PageHeader
+      title="Chat workspace"
+      context="Guided conversations with clear session signals and tidy history."
+      supportingStatus={
+        <>
+          {selectedSession ? activityBadge(selectedSession.activity) : <Badge variant="muted">No sessions</Badge>}
+          {selectedSession ? <Badge variant="muted">{selectedSession.channel}</Badge> : null}
+          {selectedSession ? (
+            <Badge variant="muted">Updated {selectedSession.updatedAt}</Badge>
+          ) : null}
+        </>
+      }
+      primaryAction={
+        <Button onClick={refreshSessions} size="lg" variant="secondary">
+          Refresh
+        </Button>
+      }
+    />
+  );
+
+  if (sessionsStatus === "loading") {
+    return (
+      <div className="space-y-5 pb-6">
+        {header}
+        <LoadingState title="Loading chat sessions" description="Connecting to OpenClaw chat…" />
+      </div>
+    );
   }
 
-  function sendMessage() {
-    const trimmed = composerText.trim();
-    if (!trimmed) return;
-
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: `m-${Date.now()}`,
-        sessionId: selectedSession.id,
-        role: "user",
-        text: trimmed,
-        time: "Now",
-      },
-      {
-        id: `m-${Date.now()}-assistant`,
-        sessionId: selectedSession.id,
-        role: "assistant",
-        text: "Got it. I recorded that and can continue from here.",
-        time: "Now",
-      },
-    ]);
-
-    setComposerText("");
+  if (sessionsStatus === "error") {
+    return (
+      <div className="space-y-5 pb-6">
+        {header}
+        <ErrorState
+          title="Unable to load chat sessions"
+          description={sessionsError ?? "Check your gateway and try refreshing."}
+          action={
+            <Button variant="ghost" onClick={refreshSessions}>
+              Retry
+            </Button>
+          }
+        />
+      </div>
+    );
   }
+
+  if (!sessions.length) {
+    return (
+      <div className="space-y-5 pb-6">
+        {header}
+        <EmptyState
+          title="No chat sessions yet"
+          description="Start a conversation from OpenClaw to see it here."
+          action={
+            <Button variant="ghost" onClick={refreshSessions}>
+              Refresh
+            </Button>
+          }
+        />
+      </div>
+    );
+  }
+
+  const nextStepText =
+    selectedSession?.activity === "waiting"
+      ? "Awaiting your reply."
+      : selectedSession?.activity === "complete"
+        ? "Start a new session when ready."
+        : "Continue the conversation.";
 
   return (
     <div className="space-y-5 pb-6">
-      <PageHeader
-        title="Chat workspace"
-        context="Guided conversations with clear session signals and tidy history."
-        supportingStatus={
-          <>
-            {activityBadge(selectedSession.activity)}
-            <Badge variant="muted">{selectedSession.channel}</Badge>
-          </>
-        }
-        primaryAction={
-          <Button onClick={focusComposer} size="lg" variant="secondary">
-            Focus composer
-          </Button>
-        }
-      />
+      {header}
 
       <div className="grid gap-5 xl:grid-cols-[300px_1fr]">
         <Card>
@@ -165,10 +148,10 @@ export function ChatWorkspace() {
                 key={session.id}
                 type="button"
                 onClick={() => setSelectedSessionId(session.id)}
-                aria-pressed={selectedSessionId === session.id}
+                aria-pressed={activeSessionId === session.id}
                 aria-label={`Open session ${session.title}`}
                 className={`w-full rounded-xl border p-4 text-left transition-colors ${
-                  selectedSessionId === session.id
+                  activeSessionId === session.id
                     ? "border-zinc-900 bg-zinc-900 text-zinc-50 dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900"
                     : "border-zinc-200 bg-zinc-50 hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:bg-zinc-800"
                 }`}
@@ -187,10 +170,10 @@ export function ChatWorkspace() {
         <Card>
           <CardHeader>
             <div className="flex flex-wrap items-center gap-2">
-              {activityBadge(selectedSession.activity)}
-              <Badge variant="muted">{selectedSession.channel}</Badge>
+              {selectedSession ? activityBadge(selectedSession.activity) : null}
+              {selectedSession ? <Badge variant="muted">{selectedSession.channel}</Badge> : null}
             </div>
-            <CardTitle className="mt-3 text-2xl">{selectedSession.title}</CardTitle>
+            <CardTitle className="mt-3 text-2xl">{selectedSession?.title}</CardTitle>
             <CardDescription className="text-base">Messages are grouped and spaced for easy reading.</CardDescription>
           </CardHeader>
 
@@ -204,16 +187,18 @@ export function ChatWorkspace() {
                 <div className="rounded-xl border border-zinc-200 bg-white p-3 dark:border-zinc-700 dark:bg-zinc-950">
                   <p className="text-xs text-zinc-500">Current state</p>
                   <p className="mt-1 text-base font-medium text-zinc-900 dark:text-zinc-100">
-                    {selectedSession.activity === "active" ? "In progress" : selectedSession.activity === "waiting" ? "Waiting on reply" : "Complete"}
+                    {selectedSession ? activityLabel(selectedSession.activity) : "—"}
                   </p>
                 </div>
                 <div className="rounded-xl border border-zinc-200 bg-white p-3 dark:border-zinc-700 dark:bg-zinc-950">
                   <p className="text-xs text-zinc-500">Last update</p>
-                  <p className="mt-1 text-base font-medium text-zinc-900 dark:text-zinc-100">{selectedSession.updatedAt}</p>
+                  <p className="mt-1 text-base font-medium text-zinc-900 dark:text-zinc-100">
+                    {selectedSession?.updatedAt ?? "—"}
+                  </p>
                 </div>
                 <div className="rounded-xl border border-zinc-200 bg-white p-3 dark:border-zinc-700 dark:bg-zinc-950">
                   <p className="text-xs text-zinc-500">Next step</p>
-                  <p className="mt-1 text-base font-medium text-zinc-900 dark:text-zinc-100">Review and continue</p>
+                  <p className="mt-1 text-base font-medium text-zinc-900 dark:text-zinc-100">{nextStepText}</p>
                 </div>
               </div>
             </div>
@@ -222,41 +207,62 @@ export function ChatWorkspace() {
               className="max-h-[420px] space-y-3 overflow-y-auto rounded-2xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-950"
               role="log"
               aria-live="polite"
-              aria-label={`${selectedSession.title} messages`}
+              aria-label={`${selectedSession?.title ?? "Chat"} messages`}
             >
-              {sessionMessages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`max-w-[90%] rounded-2xl border px-4 py-3 ${
-                    message.role === "assistant"
-                      ? "border-zinc-200 bg-zinc-50 text-zinc-900 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100"
-                      : "ml-auto border-[var(--color-accent-border)] bg-[var(--color-accent-muted)] text-[var(--color-accent-foreground)]"
-                  }`}
-                >
-                  <p className="flex items-center gap-2 text-xs font-medium opacity-75">
-                    {message.role === "assistant" ? <BotMessageSquare className="size-3.5" /> : <UserRound className="size-3.5" />}
-                    {message.role === "assistant" ? "Assistant" : "You"} · {message.time}
-                  </p>
-                  <p className="mt-1 text-base leading-7">{message.text}</p>
-                </div>
-              ))}
+              {messagesStatus === "loading" ? (
+                <LoadingState title="Loading messages" description="Gathering conversation history…" />
+              ) : messagesStatus === "error" ? (
+                <ErrorState
+                  title="Unable to load messages"
+                  description={messagesError ?? "Try refreshing to reconnect to the session."}
+                  action={
+                    <Button variant="ghost" onClick={refreshMessages}>
+                      Retry
+                    </Button>
+                  }
+                />
+              ) : sessionMessages.length ? (
+                sessionMessages.map((message) => (
+                  <div
+                    key={message.id}
+                    className={`max-w-[90%] rounded-2xl border px-4 py-3 ${
+                      message.role === "assistant"
+                        ? "border-zinc-200 bg-zinc-50 text-zinc-900 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100"
+                        : "ml-auto border-[var(--color-accent-border)] bg-[var(--color-accent-muted)] text-[var(--color-accent-foreground)]"
+                    }`}
+                  >
+                    <p className="flex items-center gap-2 text-xs font-medium opacity-75">
+                      {message.role === "assistant" ? (
+                        <BotMessageSquare className="size-3.5" />
+                      ) : (
+                        <UserRound className="size-3.5" />
+                      )}
+                      {message.role === "assistant" ? "Assistant" : "You"} · {formatTimestamp(message.time)}
+                    </p>
+                    <p className="mt-1 text-base leading-7">{message.text}</p>
+                  </div>
+                ))
+              ) : (
+                <EmptyState
+                  title="No messages yet"
+                  description="This session is just getting started."
+                  action={
+                    <Button variant="ghost" onClick={refreshMessages}>
+                      Refresh
+                    </Button>
+                  }
+                />
+              )}
             </div>
 
             <div className="flex items-end gap-3 rounded-2xl border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-800 dark:bg-zinc-900">
-              <label className="sr-only" htmlFor="chat-compose">
-                Message
-              </label>
               <textarea
-                id="chat-compose"
-                ref={composerRef}
-                value={composerText}
-                onChange={(event) => setComposerText(event.target.value)}
-                placeholder="Type a clear next step or question…"
+                readOnly
+                placeholder="Send is coming soon—this view is currently read-only."
                 rows={2}
-                className="w-full resize-none rounded-xl border border-zinc-300 bg-white px-3 py-2 text-base outline-none focus:ring-2 focus:ring-zinc-400 dark:border-zinc-700 dark:bg-zinc-950"
+                className="w-full resize-none rounded-xl border border-zinc-300 bg-white px-3 py-2 text-base text-zinc-600 outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-400"
               />
-              <Button onClick={sendMessage} className="h-11 px-4 text-base" aria-label="Send message">
-                <Send className="size-4" />
+              <Button disabled className="h-11 px-4 text-base" aria-label="Send message">
                 Send
               </Button>
             </div>
@@ -264,7 +270,7 @@ export function ChatWorkspace() {
             <div className="flex items-center justify-between rounded-xl border border-dashed border-zinc-300 bg-zinc-50 px-4 py-3 text-sm text-zinc-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300">
               <span className="flex items-center gap-2">
                 <Clock3 className="size-4" />
-                Tip: keep requests short and specific for faster, calmer replies.
+                Tip: keep requests short and specific for calmer replies.
               </span>
               <span className="inline-flex items-center gap-1 text-zinc-500">
                 View full history <ArrowRight className="size-4" />

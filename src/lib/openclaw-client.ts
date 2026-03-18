@@ -1,14 +1,14 @@
 import { getOpenClawCompatibilityConfig, resolveApiBaseUrl } from "@/lib/openclaw-compat";
+import type {
+  OpenClawDailyBrief,
+  OpenClawJobHistoryEntry,
+  OpenClawOutput,
+  OpenClawOutputKind,
+} from "@/lib/openclaw-domains";
 
 export type StatusTone = "good" | "watch" | "neutral";
 
-export type OutputItem = {
-  id: string;
-  title: string;
-  summary: string;
-  body: string;
-  source: string;
-  updatedAt: string;
+export type OutputItem = OpenClawOutput & {
   pinned: boolean;
   saved: boolean;
 };
@@ -109,6 +109,10 @@ export type StatusTimelineEvent = {
   tone: StatusTone;
 };
 
+export type OutputKind = OpenClawOutputKind;
+export type JobHistoryEntry = OpenClawJobHistoryEntry;
+export type DailyBrief = OpenClawDailyBrief;
+
 const compat = getOpenClawCompatibilityConfig();
 const API_BASE_URL = resolveApiBaseUrl(compat).replace(/\/$/, "");
 
@@ -122,6 +126,8 @@ const ENDPOINTS = {
   chatMessages: process.env.NEXT_PUBLIC_OPENCLAW_ENDPOINT_CHAT_MESSAGES ?? "/chat/sessions/{sessionId}/messages",
   statusSnapshot: process.env.NEXT_PUBLIC_OPENCLAW_ENDPOINT_STATUS_SNAPSHOT ?? "/status/snapshot",
   statusTimeline: process.env.NEXT_PUBLIC_OPENCLAW_ENDPOINT_STATUS_TIMELINE ?? "/status/timeline",
+  jobHistory: process.env.NEXT_PUBLIC_OPENCLAW_ENDPOINT_JOB_HISTORY ?? "/jobs/history",
+  dailyBriefs: process.env.NEXT_PUBLIC_OPENCLAW_ENDPOINT_DAILY_BRIEFS ?? "/daily-briefs",
 };
 
 function buildUrl(path: string) {
@@ -311,7 +317,13 @@ export function fetchJobs() {
 }
 
 export function fetchOutputs() {
-  return openClawFetch<OutputItem[]>(ENDPOINTS.outputs);
+  return openClawFetch<OpenClawOutput[]>(ENDPOINTS.outputs).then((items) =>
+    items.map((item) => ({
+      ...item,
+      pinned: false,
+      saved: false,
+    })),
+  );
 }
 
 export function fetchConnections() {
@@ -333,4 +345,14 @@ export function fetchStatusSnapshot() {
 
 export function fetchStatusTimeline() {
   return openClawFetch<StatusTimelineEvent[]>(ENDPOINTS.statusTimeline);
+}
+
+export function fetchJobHistory(jobId?: string) {
+  return openClawRequest<JobHistoryEntry[]>(ENDPOINTS.jobHistory, {
+    params: jobId ? { jobId } : undefined,
+  });
+}
+
+export function fetchDailyBriefs() {
+  return openClawFetch<DailyBrief[]>(ENDPOINTS.dailyBriefs);
 }

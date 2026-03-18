@@ -327,9 +327,76 @@ export function HomeDashboard() {
     const attentionSignal = signals.find((signal) => signal.tone !== "good");
     const attentionJob = attentionSignal ? null : activeJobs[0];
     const nextSteps = quickActions.slice(0, 3);
+    const focusCue = (() => {
+      if (attentionSignal) {
+        return {
+          icon: signalToneIcon(attentionSignal.tone),
+          title: attentionSignal.label,
+          detail: attentionSignal.value,
+          helper:
+            attentionSignal.tone === "watch"
+              ? "Action recommended soon."
+              : "Keep this signal on your radar.",
+          statusLabel:
+            attentionSignal.tone === "watch"
+              ? "Action recommended"
+              : "Signal at watch",
+        };
+      }
 
+      if (attentionJob) {
+        return {
+          icon: Timer,
+          title: attentionJob.title,
+          detail: attentionJob.detail,
+          helper: `ETA ${attentionJob.eta}.`,
+          statusLabel: "Job in progress",
+        };
+      }
+
+      return {
+        icon: CheckCircle2,
+        title: "Steady day",
+        detail: "Live data is calm and nothing is flagged for attention.",
+        helper: "We will spotlight anything urgent as soon as it appears.",
+        statusLabel: "All clear",
+      };
+    })();
+    const focusNeedsAttention = Boolean(attentionSignal || attentionJob);
+
+    const FocusIcon = focusCue.icon;
     return (
       <div className="space-y-6">
+        <div
+          className={`rounded-2xl border px-5 py-4 ${
+            focusNeedsAttention
+              ? "border-[var(--color-accent-border)] bg-[var(--color-accent-muted)]"
+              : "border-[var(--color-border-default)] bg-[var(--color-surface-muted)]"
+          }`}
+        >
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <span
+                className={`flex h-10 w-10 items-center justify-center rounded-2xl border text-base ${
+                  focusNeedsAttention
+                    ? "border-[var(--color-accent-border)] bg-[var(--color-accent-muted)] text-[var(--color-accent-foreground)]"
+                    : "border-[var(--color-border-default)] bg-[var(--color-surface-muted)] text-[var(--color-text-muted)]"
+                }`}
+              >
+                <FocusIcon className="size-5" aria-hidden="true" />
+              </span>
+              <div>
+                <p className="text-[0.6rem] font-semibold uppercase tracking-[0.4em] text-[var(--color-text-muted)]">
+                  Focus
+                </p>
+                <p className="text-lg font-semibold text-[var(--color-text-strong)]">{focusCue.title}</p>
+                <p className="text-sm text-[var(--color-text-muted)]">{focusCue.detail}</p>
+              </div>
+            </div>
+            <Badge variant={focusNeedsAttention ? undefined : "muted"}>{focusCue.statusLabel}</Badge>
+          </div>
+          <p className="mt-3 text-sm text-[var(--color-text-muted)]">{focusCue.helper}</p>
+        </div>
         <div className="grid gap-4 md:grid-cols-3">
           <Card>
             <CardHeader>

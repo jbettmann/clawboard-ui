@@ -126,13 +126,12 @@
 
 ## Current State
 
-The existing repository now has a refreshed Next.js/Tailwind dashboard shell with a semantic token foundation, explicit theme controls, a shadcn-style sidebar-led navigation system, and a first-pass live OpenClaw data layer. The app is no longer purely demo-state, but additional product redesign and deeper live-data coverage are still needed:
+The repository has now been re-audited for the Phase 1–4 reset and patched to close the most important gaps that were still preventing those phases from being truly complete:
 
-- The shell now uses the full viewport more effectively and supports light/dark/system theme preferences.
-- The primary navigation is sidebar-driven and shared page headers provide more consistent title/context/action structure across the dashboard.
-- A shared OpenClaw client, typed domain models, async resource utilities, and read-only live data hooks are now in place.
-- Core dashboard surfaces now use read-only live wiring with loading, error, and empty states instead of mock read-path content.
-- Later phases still need richer real-data coverage (history/brief distinctions/session depth), product-level redesign, and safe write-path integrations where supported.
+- The shell remains full-width, theme-aware, and sidebar-led, with the shared foundation from Phases 1–2 intact.
+- Home remains redesigned around live context, attention, and next actions.
+- Additional Phase 1–4 cleanup work has now removed more remaining fake/demo read-path behavior by wiring chat, connections, status/history, and output state handling more directly to live OpenClaw reads.
+- The app still needs the later planned product-surface work in Phases 5+ for richer detail, write flows, and deeper model distinctions, but the reset cleanup PR is focused on making Phases 1–4 honestly closer to their stated delivery.
 
 ### Done
 - New multi-phase redesign + live-data migration plan approved.
@@ -145,9 +144,11 @@ The existing repository now has a refreshed Next.js/Tailwind dashboard shell wit
 - Validation completed for Phase 3 with successful `npm run lint` and `npm run build`.
 - Phase 4 home redesign completed around real user context, attention signals, and clear next actions using the live-data foundation.
 - Validation completed for Phase 4 with successful `npm run lint` and `npm run build`.
+- Reset audit for Phases 1–4 completed and cleanup changes applied to close the missing implementation gaps discovered during the audit.
+- Reset cleanup validation completed with successful `npm run lint` and `npm run build`.
 
 ### Now
-- Phase 4 is ready to be committed, pushed, and opened as a PR for review.
+- The Phase 1–4 reset cleanup block is ready to be committed, pushed, and opened as a PR for review.
 
 ### Next
-- Wait for approval and merge of the Phase 4 PR, then re-read `PLAN.md` and begin Phase 5 only after merge.
+- Wait for approval and merge of the Phase 1–4 reset cleanup PR, then re-read `PLAN.md` and begin Phase 5 only after merge.

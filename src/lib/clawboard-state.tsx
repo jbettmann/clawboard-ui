@@ -89,20 +89,33 @@ export function ClawboardStateProvider({ children }: { children: React.ReactNode
         return;
       }
 
-      setOutputsLoading(true);
+    setOutputsLoading(true);
 
-      fetchOutputs()
-        .then((items) => {
-          if (canceled) return;
-          setOutputs(items);
-          setOutputsError(null);
-          setSelectedOutputId((prev) => {
-            if (prev && items.some((item) => item.id === prev)) {
-              return prev;
-            }
-            return items[0]?.id ?? null;
+    fetchOutputs()
+      .then((items) => {
+        if (canceled) return;
+        setOutputs((prevOutputs) => {
+          const previousMap = new Map(prevOutputs.map((output) => [output.id, output]));
+          const sanitized = items.map((item) => {
+            const previous = previousMap.get(item.id);
+            return {
+              ...item,
+              pinned: previous?.pinned ?? item.pinned ?? false,
+              saved: previous?.saved ?? item.saved ?? false,
+            };
           });
-        })
+
+          setSelectedOutputId((prevId) => {
+            if (prevId && sanitized.some((output) => output.id === prevId)) {
+              return prevId;
+            }
+            return sanitized[0]?.id ?? null;
+          });
+
+          return sanitized;
+        });
+        setOutputsError(null);
+      })
         .catch((error) => {
           if (canceled) return;
           setOutputsError(error?.message ?? "Unable to load outputs.");
