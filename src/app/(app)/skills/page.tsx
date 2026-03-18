@@ -1,10 +1,5 @@
-import { PageTemplate } from "@/components/page-template";
+import { SkillsManagement } from "@/components/skills-management";
 
 export default function SkillsPage() {
-  return (
-    <PageTemplate
-      title="Skills"
-      description="Browse, manage, and activate skill modules that extend assistant behavior."
-    />
-  );
+  return <SkillsManagement />;
 }

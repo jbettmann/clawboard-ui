@@ -1,10 +1,5 @@
-import { PageTemplate } from "@/components/page-template";
+import { JobsManagement } from "@/components/jobs-management";
 
 export default function JobsPage() {
-  return (
-    <PageTemplate
-      title="Jobs"
-      description="Monitor active runs, queued tasks, and delegated background work."
-    />
-  );
+  return <JobsManagement />;
 }

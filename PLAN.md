@@ -1,4 +1,4 @@
-# Clawboard UI – Product Plan (Phases 1–2)
+# Clawboard UI – Product Plan (Phases 1–3)
 
 ## Approved Plan
 
@@ -20,6 +20,14 @@
 3. Keep visual tone calm, modern, intuitive, and elderly-friendly (avoid admin-console density).
 4. Preserve buildability and validation confidence.
 
+### Phase 3 — Skills + Jobs Product Surfaces
+1. Replace Skills placeholder with a real management surface.
+2. Implement Skills list/detail/form editing patterns directly in UI.
+3. Replace Jobs placeholder with a real management surface.
+4. Implement Jobs list/detail UI with plain-language schedule editing and obvious actions.
+5. Keep layout calm, modern, intuitive, and elderly-friendly.
+6. Preserve buildability and validation confidence after UI implementation.
+
 ## Checklist Status
 
 ### Phase 1
@@ -39,15 +47,23 @@
 - [x] Shell heading refined to feel like a daily assistant, not an admin console
 - [x] Validation rerun after Phase 2 UI implementation (`npm run lint`, `npm run build`)
 
+### Phase 3
+- [x] Skills route upgraded from placeholder to an interactive management surface
+- [x] Skills list/detail/form editing pattern implemented with save/reset/create actions
+- [x] Skills form includes plain labels, large controls, and enabled/safety states
+- [x] Jobs route upgraded from placeholder to an interactive management surface
+- [x] Jobs list/detail editing implemented with plain-language schedule input
+- [x] Jobs actions implemented and clearly visible (Run now, Pause, Resume, Skip next)
+- [x] Validation rerun after Phase 3 UI implementation (`npm run lint`, `npm run build`)
+
 ## Current State
 
-The repository now contains a working Phase 2 Home dashboard centered on day-start clarity and low-friction actions:
+The repository now contains working product surfaces for Home, Skills, and Jobs:
 
-- Home is now a real product surface (`HomeDashboard`), not a scaffold card.
-- The dashboard includes a structured morning brief with readable signal cards and an upcoming reminder.
-- Quick actions are prominent and approachable with large hit targets and plain labels.
-- Active jobs are summarized with calm urgency indicators and ETA context.
-- Pinned outputs are immediately accessible from Home for continuity.
-- App shell branding now communicates a supportive daily companion posture.
+- **Home (Phase 2):** Day-start dashboard with morning brief, status pulse, active jobs, pinned outputs, and quick actions.
+- **Skills (Phase 3):** Full list/detail/form pattern with editable fields (name, summary, trigger guidance, tags, safety level, enabled state), plus Add, Save, and Reset actions.
+- **Jobs (Phase 3):** Full list/detail management pattern with editable purpose and plain-language schedule input, schedule interpretation hint, and clear controls (Run now, Pause, Resume, Skip next, Save changes).
+- **Design posture:** Surfaces use calm spacing, high-contrast typography, plain language, and larger touch targets to remain intuitive and elderly-friendly.
+- **Buildability:** Lint and production build pass after Phase 3 implementation.
 
-Phase 1 remains complete. Phase 2 dashboard implementation and validation are complete.
+Phase 1, Phase 2, and Phase 3 are complete and validated.
