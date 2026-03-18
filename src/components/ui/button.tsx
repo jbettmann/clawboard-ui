@@ -5,20 +5,21 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[var(--radius-md)] text-sm font-semibold transition-base disabled:pointer-events-none disabled:opacity-50 outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] focus-visible:ring-offset-0",
+  "interactive-panel inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[var(--radius-md)] border border-transparent text-sm font-semibold transition-base disabled:pointer-events-none disabled:opacity-50 outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] focus-visible:ring-offset-0 active:translate-y-px",
   {
     variants: {
       variant: {
         default:
-          "bg-[var(--color-accent-primary)] text-[var(--color-surface-card)] shadow-[var(--shadow-card)] hover:brightness-110",
+          "bg-[var(--color-accent-primary)] text-[var(--color-surface-card)] shadow-[var(--shadow-soft)] hover:brightness-105 hover:shadow-[var(--shadow-card)]",
         secondary:
-          "bg-[var(--color-surface-muted)] text-[var(--color-text-strong)] border border-[var(--color-border-default)] hover:bg-[var(--color-surface-card)] hover:border-[var(--color-border-strong)]",
-        ghost: "text-[var(--color-text-muted)] hover:bg-[var(--color-surface-muted)]",
+          "border border-[var(--color-border-default)] bg-[color-mix(in_srgb,var(--color-surface-muted)_86%,transparent)] text-[var(--color-text-strong)] hover:border-[var(--color-border-strong)] hover:bg-[var(--color-surface-card)]",
+        ghost:
+          "text-[var(--color-text-muted)] hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text-strong)]",
       },
       size: {
         default: "h-10 px-4 py-2",
-        sm: "h-8 px-3",
-        lg: "h-11 px-5",
+        sm: "h-8 rounded-[calc(var(--radius-md)-0.2rem)] px-3 text-[0.82rem]",
+        lg: "h-11 px-5 text-[0.95rem]",
       },
     },
     defaultVariants: {
@@ -34,18 +35,10 @@ export interface ButtonProps
   asChild?: boolean;
 }
 
-const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
-    const Comp = asChild ? Slot : "button";
-    return (
-      <Comp
-        className={cn(buttonVariants({ variant, size, className }))}
-        ref={ref}
-        {...props}
-      />
-    );
-  },
-);
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(({ className, variant, size, asChild = false, ...props }, ref) => {
+  const Comp = asChild ? Slot : "button";
+  return <Comp className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props} />;
+});
 Button.displayName = "Button";
 
 export { Button, buttonVariants };

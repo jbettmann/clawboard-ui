@@ -116,23 +116,23 @@
 - [x] Validation run (`npm run lint`, `npm run build`)
 
 ### Phase 8
-- [ ] Responsive behavior refined across common screen sizes
-- [ ] Spacing, alignment, and type hierarchy polished throughout
-- [ ] Hover / focus / pressed / loading / transition states polished
-- [ ] Reusable patterns normalized across surfaces
-- [ ] Light and dark mode QA pass completed
-- [ ] Final benchmark polish pass completed
-- [ ] Validation run (`npm run lint`, `npm run build`)
+- [x] Responsive behavior refined across common screen sizes
+- [x] Spacing, alignment, and type hierarchy polished throughout
+- [x] Hover / focus / pressed / loading / transition states polished
+- [x] Reusable patterns normalized across surfaces
+- [x] Light and dark mode QA pass completed
+- [x] Final benchmark polish pass completed
+- [x] Validation run (`npm run lint`, `npm run build`)
 
 ## Current State
 
-The repository has now been re-audited for the full Phase 1–7 reset block and patched to close the most important gaps that were still preventing those phases from being truly complete:
+The repository has now completed the full approved Phase 1–8 plan:
 
-- The shell remains full-width, theme-aware, and sidebar-led, with the shared foundation from Phases 1–2 intact.
-- Home remains redesigned around live context, attention, and next actions.
-- Additional reset cleanup work removed remaining fake/demo read-path behavior by wiring outputs, briefs, chat history, and chat send behavior more directly to live OpenClaw reads.
-- Phase 7 observability has now been completed with live runtime health in Settings, clearer connection guidance, and a more actionable status/history flow.
-- The remaining planned work is the final polish pass in Phase 8.
+- The dashboard remains full-width, theme-aware, and sidebar-led, with the shared foundation from Phases 1–2 intact.
+- Live OpenClaw data powers the primary product surfaces across home, skills, jobs, outputs, chat, connections, and settings.
+- Observability work from Phase 7 remains in place with runtime health, clearer connection guidance, and a more actionable status/history flow.
+- Phase 8 polish has tightened spacing, hierarchy, hover/focus/pressed states, loading/empty/error treatments, and responsive behavior through shared primitives rather than one-off screen patches.
+- Light and dark mode now share the same visual language more intentionally through updated surface, overlay, and accent treatment.
 
 ### Done
 - New multi-phase redesign + live-data migration plan approved.
@@ -154,9 +154,12 @@ The repository has now been re-audited for the full Phase 1–7 reset block and 
 - Reset audit for Phases 1–7 completed and cleanup changes applied to close the missing implementation gaps discovered during the audit.
 - Runtime health was added to Settings, output pin/save state now seeds from live metadata and persists across refreshes, and the connections/status surfaces were rewritten to be more actionable.
 - Reset cleanup validation for Phases 1–7 completed with successful `npm run lint` and `npm run build`.
+- Phase 8 final polish completed across shared visual primitives, spacing, hierarchy, responsive behavior, and interaction states.
+- Light and dark mode were both rebalanced through shared surface, overlay, button, state, and header treatments.
+- Validation completed for Phase 8 with successful `npm run lint` and `npm run build`.
 
 ### Now
-- The Phase 1–7 reset cleanup block is ready for review and merge.
+- The final Phase 8 polish PR is ready for review and merge.
 
 ### Next
-- After the Phase 1–7 reset cleanup PR is merged, re-read `PLAN.md` and begin Phase 8.
+- If this PR is merged, the approved PLAN.md scope is complete.
