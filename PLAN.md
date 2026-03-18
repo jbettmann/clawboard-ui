@@ -1,4 +1,4 @@
-# Clawboard UI – Product Plan (Phases 1–3)
+# Clawboard UI – Product Plan (Phases 1–4)
 
 ## Approved Plan
 
@@ -28,6 +28,14 @@
 5. Keep layout calm, modern, intuitive, and elderly-friendly.
 6. Preserve buildability and validation confidence after UI implementation.
 
+### Phase 4 — Outputs + Home Customization
+1. Replace Outputs placeholder with a real product surface.
+2. Implement Outputs feed/detail behavior with pin/save actions.
+3. Connect pinned outputs so Home reflects pin/unpin behavior.
+4. Add Home customization controls for widget visibility and order.
+5. Keep interaction model simple, calm, and elderly-friendly.
+6. Preserve buildability and validation confidence after Phase 4 implementation.
+
 ## Checklist Status
 
 ### Phase 1
@@ -56,14 +64,24 @@
 - [x] Jobs actions implemented and clearly visible (Run now, Pause, Resume, Skip next)
 - [x] Validation rerun after Phase 3 UI implementation (`npm run lint`, `npm run build`)
 
+### Phase 4
+- [x] Outputs route upgraded from placeholder to an interactive feed/detail surface
+- [x] Output detail actions implemented for pin/unpin and save/unsave
+- [x] Home pinned outputs connected to Outputs pin state
+- [x] Home customization controls implemented for widget visibility/order
+- [x] Preferences persist locally for a simple, dependable experience
+- [x] Validation rerun after Phase 4 UI implementation (`npm run lint`, `npm run build`)
+
 ## Current State
 
-The repository now contains working product surfaces for Home, Skills, and Jobs:
+The repository now contains working product surfaces for Home, Skills, Jobs, and Outputs:
 
-- **Home (Phase 2):** Day-start dashboard with morning brief, status pulse, active jobs, pinned outputs, and quick actions.
+- **Home (Phases 2 + 4):** Day-start dashboard with morning brief, status pulse, active jobs, pinned outputs, quick actions, and a simple customization surface for widget visibility/order.
 - **Skills (Phase 3):** Full list/detail/form pattern with editable fields (name, summary, trigger guidance, tags, safety level, enabled state), plus Add, Save, and Reset actions.
 - **Jobs (Phase 3):** Full list/detail management pattern with editable purpose and plain-language schedule input, schedule interpretation hint, and clear controls (Run now, Pause, Resume, Skip next, Save changes).
+- **Outputs (Phase 4):** Full feed/detail pattern with pin/save controls and state-connected Home pin behavior.
 - **Design posture:** Surfaces use calm spacing, high-contrast typography, plain language, and larger touch targets to remain intuitive and elderly-friendly.
-- **Buildability:** Lint and production build pass after Phase 3 implementation.
+- **State model:** Shared client state provider keeps outputs and Home customization aligned, with local persistence.
+- **Buildability:** Lint and production build pass after Phase 4 implementation.
 
-Phase 1, Phase 2, and Phase 3 are complete and validated.
+Phase 1, Phase 2, Phase 3, and Phase 4 are complete and validated.
