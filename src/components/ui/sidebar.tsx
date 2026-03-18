@@ -1,20 +1,39 @@
 "use client";
 
 import * as React from "react";
-import { PanelLeft, X } from "lucide-react";
+import { Slot } from "@radix-ui/react-slot";
+import { cva, type VariantProps } from "class-variance-authority";
+import { PanelLeft } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 
-type SidebarContextValue = {
+const SIDEBAR_WIDTH = "16rem";
+const SIDEBAR_WIDTH_ICON = "3rem";
+const SIDEBAR_WIDTH_MOBILE = "18rem";
+const SIDEBAR_KEYBOARD_SHORTCUT = "b";
+
+type SidebarContextProps = {
   open: boolean;
-  setOpen: (open: boolean) => void;
-  openMobile: boolean;
-  setOpenMobile: (open: boolean) => void;
+  setOpen: (value: boolean | ((prev: boolean) => boolean)) => void;
   isMobile: boolean;
+  openMobile: boolean;
+  setOpenMobile: (value: boolean) => void;
   toggleSidebar: () => void;
 };
 
-const SidebarContext = React.createContext<SidebarContextValue | null>(null);
+const SidebarContext = React.createContext<SidebarContextProps | null>(null);
 
 function useSidebar() {
   const context = React.useContext(SidebarContext);
@@ -24,8 +43,7 @@ function useSidebar() {
   return context;
 }
 
-type SidebarProviderProps = {
-  children: React.ReactNode;
+type SidebarProviderProps = React.ComponentProps<"div"> & {
   defaultOpen?: boolean;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -36,121 +54,174 @@ function SidebarProvider({
   defaultOpen = true,
   open: openProp,
   onOpenChange,
+  className,
+  style,
+  ...props
 }: SidebarProviderProps) {
+  const isMobile = useIsMobile();
   const [uncontrolledOpen, setUncontrolledOpen] = React.useState(defaultOpen);
   const [openMobile, setOpenMobile] = React.useState(false);
-  const [isMobile, setIsMobile] = React.useState(false);
+  const isControlled = openProp !== undefined;
+  const open = isControlled ? openProp : uncontrolledOpen;
 
-  React.useEffect(() => {
-    const media = window.matchMedia("(max-width: 1023px)");
-    const handleChange = (event: MediaQueryList | MediaQueryListEvent) => {
-      setIsMobile(event.matches);
-    };
-
-    handleChange(media);
-
-    if (media.addEventListener) {
-      media.addEventListener("change", handleChange);
-      return () => media.removeEventListener("change", handleChange);
-    }
-
-    media.addListener(handleChange);
-    return () => media.removeListener(handleChange);
-  }, []);
-
-  const open = openProp ?? uncontrolledOpen;
   const setOpen = React.useCallback(
-    (nextOpen: boolean) => {
+    (value: boolean | ((prev: boolean) => boolean)) => {
+      const next = typeof value === "function" ? value(open) : value;
       if (onOpenChange) {
-        onOpenChange(nextOpen);
-        return;
+        onOpenChange(next);
       }
-      setUncontrolledOpen(nextOpen);
+      if (!isControlled) {
+        setUncontrolledOpen(next);
+      }
     },
-    [onOpenChange],
+    [isControlled, onOpenChange, open],
   );
 
   const toggleSidebar = React.useCallback(() => {
     if (isMobile) {
-      setOpenMobile((value) => !value);
+      setOpenMobile((current) => !current);
       return;
     }
-    setOpen(!open);
-  }, [isMobile, open, setOpen]);
+    setOpen((state) => !state);
+  }, [isMobile, setOpen]);
 
-  const value = React.useMemo(
-    () => ({ open, setOpen, openMobile, setOpenMobile, isMobile, toggleSidebar }),
-    [open, setOpen, openMobile, isMobile, toggleSidebar],
+  React.useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    const handleKey = (event: KeyboardEvent) => {
+      if (
+        event.key.toLowerCase() === SIDEBAR_KEYBOARD_SHORTCUT &&
+        (event.metaKey || event.ctrlKey)
+      ) {
+        event.preventDefault();
+        toggleSidebar();
+      }
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [toggleSidebar]);
+
+  const contextValue = React.useMemo(
+    () => ({
+      open,
+      setOpen,
+      isMobile,
+      openMobile,
+      setOpenMobile,
+      toggleSidebar,
+    }),
+    [open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar],
   );
 
-  return <SidebarContext.Provider value={value}>{children}</SidebarContext.Provider>;
+  return (
+    <SidebarContext.Provider value={contextValue}>
+      <div
+        className={cn("group/sidebar-wrapper flex min-h-svh w-full", className)}
+        style={{
+          ...(style as React.CSSProperties),
+          ["--sidebar-width"]: SIDEBAR_WIDTH,
+          ["--sidebar-width-icon"]: SIDEBAR_WIDTH_ICON,
+        } as React.CSSProperties}
+        {...props}
+      >
+        {children}
+      </div>
+    </SidebarContext.Provider>
+  );
 }
 
-function Sidebar({ className, children }: React.ComponentProps<"aside">) {
-  const { open, openMobile, setOpenMobile, isMobile } = useSidebar();
+type SidebarProps = React.ComponentProps<"div"> & { side?: "left" | "right" };
+
+function Sidebar({ side = "left", className, children, ...props }: SidebarProps) {
+  const { isMobile, open, openMobile, setOpenMobile } = useSidebar();
 
   if (isMobile) {
     return (
-      <>
-        {openMobile ? (
-          <div className="fixed inset-0 z-50 flex lg:hidden">
-            <button
-              type="button"
-              className="absolute inset-0 bg-slate-950/45"
-              aria-label="Close navigation"
-              onClick={() => setOpenMobile(false)}
-            />
-            <aside
-              className={cn(
-                "relative z-10 flex h-full w-72 flex-col border-r border-[var(--color-border-default)] bg-[var(--color-surface-card)] shadow-2xl",
-                className,
-              )}
-            >
-              {children}
-            </aside>
-          </div>
-        ) : null}
-      </>
+      <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
+        <SheetContent
+          side={side}
+          className="bg-sidebar text-sidebar-foreground w-(--sidebar-width) p-0 [&>button]:hidden"
+          style={{
+            ["--sidebar-width"]: SIDEBAR_WIDTH_MOBILE,
+          } as React.CSSProperties}
+        >
+          <SheetHeader className="sr-only">
+            <SheetTitle>Navigation</SheetTitle>
+            <SheetDescription>Primary navigation.</SheetDescription>
+          </SheetHeader>
+          <div className="flex h-full w-full flex-col">{children}</div>
+        </SheetContent>
+      </Sheet>
     );
   }
 
   return (
     <aside
+      data-slot="sidebar"
       data-state={open ? "expanded" : "collapsed"}
+      data-side={side}
       className={cn(
-        "hidden shrink-0 border-r border-[var(--color-border-default)] bg-[var(--color-surface-card)] transition-[width] duration-200 lg:flex lg:flex-col",
-        open ? "lg:w-72" : "lg:w-20",
+        "hidden md:flex fixed inset-y-0 z-30 flex-col border-r border-[var(--sidebar-border)] bg-sidebar text-sidebar-foreground shadow-[0_20px_40px_-32px_rgba(0,0,0,0.65)] transition-[width] duration-200",
+        open ? "w-(--sidebar-width)" : "w-(--sidebar-width-icon)",
         className,
       )}
+      {...props}
     >
       {children}
     </aside>
   );
 }
 
-function SidebarHeader({ className, ...props }: React.ComponentProps<"div">) {
-  return <div className={cn("flex flex-col gap-4 border-b border-[var(--color-border-default)] p-4", className)} {...props} />;
+function SidebarTrigger({ className, ...props }: React.ComponentProps<typeof Button>) {
+  const { toggleSidebar } = useSidebar();
+
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      aria-label="Toggle navigation"
+      className={cn("size-9", className)}
+      onClick={toggleSidebar}
+      {...props}
+    >
+      <PanelLeft className="size-5" aria-hidden="true" />
+    </Button>
+  );
 }
 
-function SidebarContent({ className, ...props }: React.ComponentProps<"div">) {
-  return <div className={cn("flex flex-1 flex-col gap-4 overflow-y-auto p-4", className)} {...props} />;
+function SidebarInset({ className, ...props }: React.ComponentProps<"main">) {
+  return (
+    <main
+      className={cn("bg-background relative flex w-full flex-1 flex-col", className)}
+      {...props}
+    />
+  );
+}
+
+function SidebarHeader({ className, ...props }: React.ComponentProps<"div">) {
+  return <div className={cn("flex flex-col gap-2 p-3", className)} {...props} />;
 }
 
 function SidebarFooter({ className, ...props }: React.ComponentProps<"div">) {
-  return <div className={cn("border-t border-[var(--color-border-default)] p-4", className)} {...props} />;
+  return <div className={cn("mt-auto flex flex-col gap-2 p-3", className)} {...props} />;
+}
+
+function SidebarContent({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div className={cn("flex min-h-0 flex-1 flex-col gap-2 overflow-auto", className)} {...props} />
+  );
 }
 
 function SidebarGroup({ className, ...props }: React.ComponentProps<"div">) {
-  return <div className={cn("flex flex-col gap-2", className)} {...props} />;
+  return <div className={cn("flex flex-col gap-1 p-2", className)} {...props} />;
 }
 
 function SidebarGroupLabel({ className, ...props }: React.ComponentProps<"div">) {
-  const { open, isMobile } = useSidebar();
   return (
     <div
       className={cn(
-        "px-2 text-[0.7rem] font-semibold uppercase tracking-[0.3em] text-[var(--color-text-muted)] transition-opacity duration-200",
-        !isMobile && !open ? "opacity-0" : "opacity-100",
+        "text-xs font-semibold uppercase tracking-[0.2em] text-sidebar-foreground/70",
         className,
       )}
       {...props}
@@ -163,107 +234,124 @@ function SidebarMenu({ className, ...props }: React.ComponentProps<"ul">) {
 }
 
 function SidebarMenuItem({ className, ...props }: React.ComponentProps<"li">) {
-  return <li className={cn("list-none", className)} {...props} />;
+  return <li className={cn("relative", className)} {...props} />;
 }
 
-type SidebarMenuButtonProps = React.ComponentProps<"button"> & {
-  asChild?: boolean;
-  isActive?: boolean;
-  tooltip?: string;
-};
+const sidebarMenuButtonVariants = cva(
+  "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-semibold transition hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sidebar-ring)]",
+  {
+    variants: {
+      variant: {
+        default: "text-sidebar-foreground",
+        subtle: "text-[var(--color-text-muted)]",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  },
+);
+
+type SidebarMenuButtonProps = React.ComponentProps<"button"> &
+  VariantProps<typeof sidebarMenuButtonVariants> & {
+    asChild?: boolean;
+    isActive?: boolean;
+    tooltip?: string;
+  };
 
 function SidebarMenuButton({
   className,
   asChild = false,
   isActive,
   tooltip,
-  children,
+  variant,
   ...props
 }: SidebarMenuButtonProps) {
-  const { open, isMobile } = useSidebar();
-  const buttonStyles = cn(
-    "flex w-full items-center gap-3 rounded-2xl px-3 py-2 text-sm font-semibold transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]",
-    isActive
-      ? "bg-[var(--color-accent-muted)] text-[var(--color-accent-foreground)]"
-      : "text-[var(--color-text-muted)] hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text-strong)]",
-    className,
+  const { isMobile } = useSidebar();
+  const Comp = asChild ? Slot : "button";
+  const button = (
+    <Comp
+      className={cn(
+        sidebarMenuButtonVariants({ variant }),
+        isActive && "bg-[var(--sidebar-accent)] text-[var(--sidebar-accent-foreground)]",
+        className,
+      )}
+      data-active={isActive}
+      {...props}
+    />
   );
-  const title = !isMobile && !open ? tooltip : undefined;
-  const ariaCurrent = isActive ? "page" : undefined;
 
-  if (asChild) {
-    const child = React.Children.only(children) as React.ReactElement<{
-      className?: string;
-      title?: string;
-    }>;
-    return React.cloneElement(child, {
-      className: cn(buttonStyles, child.props.className),
-      title: title ?? child.props.title,
-      "aria-current": ariaCurrent,
-      ...props,
-    });
+  if (!tooltip || isMobile) {
+    return button;
   }
 
   return (
-    <button
-      type="button"
-      className={buttonStyles}
-      title={title}
-      aria-current={ariaCurrent}
-      {...props}
-    >
-      {children}
-    </button>
+    <Tooltip>
+      <TooltipTrigger asChild>{button}</TooltipTrigger>
+      <TooltipContent className="!text-[var(--color-text-muted)]">
+        {tooltip}
+      </TooltipContent>
+    </Tooltip>
   );
 }
 
-function SidebarTrigger({ className, ...props }: React.ComponentProps<"button">) {
-  const { isMobile, open, toggleSidebar, setOpenMobile } = useSidebar();
+function SidebarSeparator({ className, ...props }: React.ComponentProps<typeof Separator>) {
+  return <Separator className={cn("border-sidebar-border", className)} {...props} />;
+}
+
+function SidebarMenuAction({ className, ...props }: React.ComponentProps<"button">) {
   return (
     <button
-      type="button"
-      aria-label={isMobile ? "Open navigation" : open ? "Collapse navigation" : "Expand navigation"}
       className={cn(
-        "inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--color-border-default)] bg-[var(--color-surface-muted)] text-[var(--color-text-muted)] transition-colors hover:border-[var(--color-border-strong)] hover:text-[var(--color-text-strong)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]",
+        "absolute right-2 top-2 rounded-full border border-transparent px-2 py-1 text-xs font-medium text-[var(--color-text-muted)] transition hover:border-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
         className,
       )}
-      onClick={() => {
-        if (isMobile) {
-          setOpenMobile(true);
-          return;
-        }
-        toggleSidebar();
-      }}
       {...props}
-    >
-      <PanelLeft className="size-4" />
-    </button>
+    />
   );
 }
 
-function SidebarClose({ className, ...props }: React.ComponentProps<"button">) {
-  const { setOpenMobile } = useSidebar();
+function SidebarMenuBadge({ className, ...props }: React.ComponentProps<"span">) {
   return (
-    <button
-      type="button"
-      aria-label="Close navigation"
+    <span
       className={cn(
-        "inline-flex h-9 w-9 items-center justify-center rounded-full border border-[var(--color-border-default)] bg-[var(--color-surface-muted)] text-[var(--color-text-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] lg:hidden",
+        "absolute right-2 top-2 inline-flex items-center justify-center rounded-full bg-[var(--sidebar-accent)] px-2 py-0.5 text-[0.65rem] font-semibold text-[var(--sidebar-accent-foreground)]",
         className,
       )}
-      onClick={() => setOpenMobile(false)}
       {...props}
-    >
-      <X className="size-4" />
-    </button>
+    />
   );
 }
 
-function SidebarInset({ className, ...props }: React.ComponentProps<"div">) {
+function SidebarMenuSkeleton({ className, showIcon = true, ...props }: React.ComponentProps<"div"> & { showIcon?: boolean }) {
   return (
-    <div
+    <div className={cn("flex items-center gap-3 rounded-md px-3 py-2", className)} {...props}>
+      {showIcon && <Skeleton className="h-3 w-3" />}
+      <Skeleton className="h-3 w-20" />
+    </div>
+  );
+}
+
+function SidebarMenuSub({ className, ...props }: React.ComponentProps<"ul">) {
+  return (
+    <ul className={cn("mt-1 flex flex-col gap-1 pl-3 border-l border-[var(--sidebar-border)]", className)} {...props} />
+  );
+}
+
+function SidebarMenuSubItem({ className, ...props }: React.ComponentProps<"li">) {
+  return <li className={cn("relative", className)} {...props} />;
+}
+
+function SidebarMenuSubButton({
+  asChild = false,
+  className,
+  ...props
+}: React.ComponentProps<"a"> & { asChild?: boolean }) {
+  const Comp = asChild ? Slot : "a";
+  return (
+    <Comp
       className={cn(
-        "flex min-h-screen flex-1 flex-col bg-[var(--color-surface-base)] min-w-0 w-full",
+        "flex items-center gap-2 rounded-md px-2 py-1 text-sm text-sidebar-foreground transition hover:bg-[var(--sidebar-accent)] hover:text-[var(--sidebar-accent-foreground)]",
         className,
       )}
       {...props}
@@ -273,7 +361,6 @@ function SidebarInset({ className, ...props }: React.ComponentProps<"div">) {
 
 export {
   Sidebar,
-  SidebarClose,
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
@@ -281,9 +368,16 @@ export {
   SidebarHeader,
   SidebarInset,
   SidebarMenu,
+  SidebarMenuAction,
+  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSkeleton,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
   SidebarProvider,
+  SidebarSeparator,
   SidebarTrigger,
   useSidebar,
 };
