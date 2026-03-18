@@ -4,6 +4,9 @@ import type {
   OpenClawJobHistoryEntry,
   OpenClawOutput,
   OpenClawOutputKind,
+  OpenClawSkill,
+  OpenClawSkillOrigin,
+  OpenClawSkillStatus,
 } from "@/lib/openclaw-domains";
 
 export type StatusTone = "good" | "watch" | "neutral";
@@ -39,30 +42,27 @@ export type HomeOverview = {
   pinnedOutputs: OutputItem[];
 };
 
-export type SkillStatus = "ready" | "needs-review" | "draft" | string;
-
-export type Skill = {
-  id: string;
-  name: string;
-  summary: string;
-  triggerHint?: string;
-  safetyLevel?: "low" | "moderate" | "high";
-  tags?: string[];
-  status: SkillStatus;
-  enabled: boolean;
-  lastEdited: string;
-};
+export type SkillStatus = OpenClawSkillStatus | string;
+export type SkillOrigin = OpenClawSkillOrigin | string;
+export type Skill = OpenClawSkill;
 
 export type JobStatus = "running" | "scheduled" | "paused" | string;
 
 export type Job = {
   id: string;
   name: string;
-  purpose: string;
-  scheduleText: string;
-  nextRun: string;
+  purpose?: string;
+  owner?: string;
+  schedule?: string;
+  scheduleText?: string;
+  nextRun?: string;
+  nextRunAt?: string;
+  lastRunAt?: string;
   status: JobStatus;
-  owner: string;
+  lastOutputId?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  metadata?: Record<string, unknown>;
 };
 
 export type ConnectionHealth = "healthy" | "attention" | "offline" | string;
