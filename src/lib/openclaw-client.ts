@@ -1,5 +1,9 @@
 import { getOpenClawCompatibilityConfig, resolveApiBaseUrl } from "@/lib/openclaw-compat";
 import type {
+  OpenClawChatMessage,
+  OpenClawChatMessageRole,
+  OpenClawChatSession,
+  OpenClawChatSessionStatus,
   OpenClawDailyBrief,
   OpenClawJobHistoryEntry,
   OpenClawOutput,
@@ -80,20 +84,23 @@ export type Connection = {
   note: string;
 };
 
-export type ChatSession = {
-  id: string;
-  title: string;
+export type ChatSessionActivity = "active" | "waiting" | "complete";
+
+export type ChatSession = OpenClawChatSession & {
+  activity: ChatSessionActivity;
   channel: string;
   updatedAt: string;
-  activity: "active" | "waiting" | "complete" | string;
 };
+
+export type ChatMessageRole = OpenClawChatMessageRole;
 
 export type ChatMessage = {
   id: string;
   sessionId: string;
-  role: "assistant" | "user";
+  role: ChatMessageRole;
   text: string;
   time: string;
+  metadata?: OpenClawChatMessage["metadata"];
 };
 
 export type StatusSnapshotItem = {
@@ -128,6 +135,7 @@ const ENDPOINTS = {
   statusTimeline: process.env.NEXT_PUBLIC_OPENCLAW_ENDPOINT_STATUS_TIMELINE ?? "/status/timeline",
   jobHistory: process.env.NEXT_PUBLIC_OPENCLAW_ENDPOINT_JOB_HISTORY ?? "/jobs/history",
   dailyBriefs: process.env.NEXT_PUBLIC_OPENCLAW_ENDPOINT_DAILY_BRIEFS ?? "/daily-briefs",
+  toolsInvoke: process.env.NEXT_PUBLIC_OPENCLAW_ENDPOINT_TOOLS_INVOKE ?? "/tools/invoke",
 };
 
 function buildUrl(path: string) {
@@ -148,6 +156,115 @@ function getBearerHeader(): { Authorization: string } | null {
     return { Authorization: `Bearer ${token}` };
   }
   return null;
+}
+
+const SESSION_ACTIVITY_MAP: Record<OpenClawChatSessionStatus, ChatSessionActivity> = {
+  active: "active",
+  paused: "waiting",
+  archived: "complete",
+};
+
+function deriveSessionActivity(status?: OpenClawChatSessionStatus): ChatSessionActivity {
+  if (!status) return "waiting";
+  return SESSION_ACTIVITY_MAP[status] ?? "waiting";
+}
+
+function deriveChannelLabel(session: OpenClawChatSession): string {
+  const raw = session.metadata ?? {};
+  const label = raw.label ?? raw.channel ?? raw.provider ?? raw.origin ?? "OpenClaw";
+  if (typeof label === "string" && label.trim().length) {
+    return label;
+  }
+  if (typeof raw.from === "string" && typeof raw.channel === "string") {
+    return `${raw.channel} · ${raw.from}`;
+  }
+  return "OpenClaw";
+}
+
+function mergeSessionTimestamp(session: OpenClawChatSession) {
+  return session.updatedAt ?? session.lastMessageAt ?? session.createdAt ?? "";
+}
+
+function mapChatSession(session: OpenClawChatSession): ChatSession {
+  return {
+    ...session,
+    activity: deriveSessionActivity(session.status),
+    channel: deriveChannelLabel(session),
+    updatedAt: mergeSessionTimestamp(session),
+  };
+}
+
+function parseTimestamp(value?: string) {
+  const parsed = Date.parse(value ?? "");
+  return Number.isNaN(parsed) ? 0 : parsed;
+}
+
+type ToolInvokeArgs = Record<string, unknown> | undefined;
+
+export type ToolInvokeRequest = {
+  tool: string;
+  action: string;
+  args?: ToolInvokeArgs;
+  sessionKey?: string;
+};
+
+export type ToolInvokeResponse<T = Record<string, unknown>> = {
+  ok: boolean;
+  result?: T;
+  error?: {
+    message: string;
+    code?: string;
+    details?: unknown;
+  };
+};
+
+async function invokeTool<T>(payload: ToolInvokeRequest) {
+  const response = await openClawRequest<ToolInvokeResponse<T>>(ENDPOINTS.toolsInvoke, {
+    method: "POST",
+    body: payload,
+  });
+
+  if (!response.ok) {
+    throw new OpenClawError(
+      200,
+      buildUrl(ENDPOINTS.toolsInvoke),
+      response.error ?? { message: "Tool invocation failed" },
+    );
+  }
+
+  return (response.result ?? ({} as T)) as T;
+}
+
+export interface SessionsSendOptions {
+  timeoutSeconds?: number;
+}
+
+export interface SessionsSendResult {
+  status?: string;
+  result?: string;
+  runId?: string;
+  sessionId?: string;
+  announceId?: string;
+  error?: string;
+}
+
+export async function sendChatMessage(
+  sessionId: string,
+  message: string,
+  options?: SessionsSendOptions,
+): Promise<SessionsSendResult> {
+  const payload: ToolInvokeRequest = {
+    tool: "sessions_send",
+    action: "json",
+    sessionKey: sessionId,
+    args: {
+      sessionKey: sessionId,
+      message,
+      timeoutSeconds: options?.timeoutSeconds ?? 15,
+    },
+  };
+
+  return invokeTool<SessionsSendResult>(payload);
 }
 
 export type OpenClawRequestMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "OPTIONS" | "HEAD";
@@ -331,12 +448,22 @@ export function fetchConnections() {
 }
 
 export function fetchChatSessions() {
-  return openClawFetch<ChatSession[]>(ENDPOINTS.chatSessions);
+  return openClawFetch<OpenClawChatSession[]>(ENDPOINTS.chatSessions).then((items) =>
+    items
+      .map(mapChatSession)
+      .sort((a, b) => parseTimestamp(b.updatedAt) - parseTimestamp(a.updatedAt)),
+  );
 }
 
 export function fetchChatMessages(sessionId: string) {
   const path = resolveChatMessagesPath(sessionId);
-  return openClawFetch<ChatMessage[]>(path);
+  return openClawFetch<OpenClawChatMessage[]>(path).then((items) =>
+    items.map((message) => ({
+      ...message,
+      text: message.content,
+      time: message.createdAt,
+    })),
+  );
 }
 
 export function fetchStatusSnapshot() {
