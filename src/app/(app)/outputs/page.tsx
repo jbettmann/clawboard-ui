@@ -1,10 +1,5 @@
-import { PageTemplate } from "@/components/page-template";
+import { OutputsManagement } from "@/components/outputs-management";
 
 export default function OutputsPage() {
-  return (
-    <PageTemplate
-      title="Outputs"
-      description="Review generated artifacts, logs, and completed job deliverables."
-    />
-  );
+  return <OutputsManagement />;
 }

@@ -1,13 +1,18 @@
+"use client";
+
 import Link from "next/link";
 import {
   AlarmClock,
+  ArrowDown,
   ArrowRight,
+  ArrowUp,
   CheckCircle2,
   CircleDashed,
   Clock3,
   FileText,
   Pin,
   PlayCircle,
+  Settings2,
   Sparkles,
   Sun,
   Timer,
@@ -17,6 +22,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { HomeWidgetId, useClawboardState } from "@/lib/clawboard-state";
 
 type StatusTone = "good" | "watch" | "neutral";
 
@@ -48,24 +54,6 @@ const todayJobs = [
   },
 ];
 
-const pinnedOutputs = [
-  {
-    title: "Morning Brief — Wednesday",
-    meta: "Updated 6 minutes ago",
-    href: "/outputs",
-  },
-  {
-    title: "Home Security Healthcheck",
-    meta: "Last run yesterday",
-    href: "/outputs",
-  },
-  {
-    title: "Weekly Project Priorities",
-    meta: "Pinned this week",
-    href: "/outputs",
-  },
-];
-
 const quickActions = [
   { label: "Start Morning Brief", icon: Sun, href: "/chat" },
   { label: "Review Active Jobs", icon: PlayCircle, href: "/jobs" },
@@ -80,6 +68,8 @@ function signalToneIcon(tone: StatusTone) {
 }
 
 export function HomeDashboard() {
+  const { outputs, widgetPreferences, moveWidget, toggleWidgetVisibility } = useClawboardState();
+
   const today = new Date();
   const dateText = new Intl.DateTimeFormat("en-US", {
     weekday: "long",
@@ -87,29 +77,13 @@ export function HomeDashboard() {
     day: "numeric",
   }).format(today);
 
-  return (
-    <div className="space-y-5 pb-6">
-      <Card className="border-zinc-200/90 bg-white dark:bg-zinc-900/80">
-        <CardHeader className="space-y-4">
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="muted" className="text-[11px]">Home Dashboard</Badge>
-            <Badge className="bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-300">Calm Mode</Badge>
-          </div>
+  const pinnedOutputs = outputs.filter((item) => item.pinned);
+  const visibleWidgets = widgetPreferences.filter((item) => item.visible);
 
-          <div className="space-y-2">
-            <CardTitle className="text-3xl font-semibold leading-tight text-zinc-900 dark:text-zinc-50">
-              Good morning. Here is your day at a glance.
-            </CardTitle>
-            <CardDescription className="flex items-center gap-2 text-base">
-              <Clock3 className="size-4" />
-              {dateText} · Everything important is in one quiet place.
-            </CardDescription>
-          </div>
-        </CardHeader>
-      </Card>
-
-      <div className="grid gap-5 lg:grid-cols-[1.45fr_1fr]">
-        <Card>
+  function renderWidget(id: HomeWidgetId) {
+    if (id === "morning-brief") {
+      return (
+        <Card key={id}>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-xl">
               <Sparkles className="size-5 text-sky-500" />
@@ -147,8 +121,12 @@ export function HomeDashboard() {
             </div>
           </CardContent>
         </Card>
+      );
+    }
 
-        <Card>
+    if (id === "quick-actions") {
+      return (
+        <Card key={id}>
           <CardHeader>
             <CardTitle className="text-xl">Quick actions</CardTitle>
             <CardDescription className="text-base">Simple starts for common routines.</CardDescription>
@@ -170,10 +148,12 @@ export function HomeDashboard() {
             })}
           </CardContent>
         </Card>
-      </div>
+      );
+    }
 
-      <div className="grid gap-5 xl:grid-cols-2">
-        <Card>
+    if (id === "active-jobs") {
+      return (
+        <Card key={id}>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-xl">
               <Timer className="size-5 text-zinc-500" />
@@ -189,9 +169,13 @@ export function HomeDashboard() {
               >
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <h3 className="text-base font-medium text-zinc-900 dark:text-zinc-100">{job.title}</h3>
-                  <span className={
-                    `rounded-full px-2.5 py-1 text-xs font-medium ${job.priority === "Soon" ? "bg-amber-100 text-amber-800 dark:bg-amber-900/35 dark:text-amber-300" : "bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200"}`
-                  }>
+                  <span
+                    className={`rounded-full px-2.5 py-1 text-xs font-medium ${
+                      job.priority === "Soon"
+                        ? "bg-amber-100 text-amber-800 dark:bg-amber-900/35 dark:text-amber-300"
+                        : "bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200"
+                    }`}
+                  >
                     {job.priority}
                   </span>
                 </div>
@@ -201,32 +185,135 @@ export function HomeDashboard() {
             ))}
           </CardContent>
         </Card>
+      );
+    }
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-xl">
-              <Pin className="size-5 text-zinc-500" />
-              Pinned outputs
-            </CardTitle>
-            <CardDescription className="text-base">Your most useful references, always visible.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {pinnedOutputs.map((item) => (
+    return (
+      <Card key={id}>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-xl">
+            <Pin className="size-5 text-zinc-500" />
+            Pinned outputs
+          </CardTitle>
+          <CardDescription className="text-base">Your most useful references, always visible.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {pinnedOutputs.length ? (
+            pinnedOutputs.map((item) => (
               <Link
-                key={item.title}
-                href={item.href}
+                key={item.id}
+                href="/outputs"
                 className="flex items-center justify-between rounded-xl border border-zinc-200/80 bg-zinc-50/70 px-4 py-3 text-sm transition-colors hover:bg-zinc-100 dark:border-zinc-800/80 dark:bg-zinc-900 dark:hover:bg-zinc-800"
               >
                 <div>
                   <p className="text-base font-medium text-zinc-900 dark:text-zinc-100">{item.title}</p>
-                  <p className="text-sm text-zinc-600 dark:text-zinc-400">{item.meta}</p>
+                  <p className="text-sm text-zinc-600 dark:text-zinc-400">Updated {item.updatedAt}</p>
                 </div>
                 <ArrowRight className="size-4 text-zinc-500" />
               </Link>
-            ))}
+            ))
+          ) : (
+            <p className="rounded-xl border border-dashed border-zinc-300 bg-zinc-50 p-4 text-sm text-zinc-600 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300">
+              No outputs are pinned yet. Open Outputs and use “Pin to Home” to add your most useful items here.
+            </p>
+          )}
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="space-y-5 pb-6">
+      <Card className="border-zinc-200/90 bg-white dark:bg-zinc-900/80">
+        <CardHeader className="space-y-4">
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="muted" className="text-[11px]">
+              Home Dashboard
+            </Badge>
+            <Badge className="bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-300">Calm Mode</Badge>
+          </div>
+
+          <div className="space-y-2">
+            <CardTitle className="text-3xl font-semibold leading-tight text-zinc-900 dark:text-zinc-50">
+              Good morning. Here is your day at a glance.
+            </CardTitle>
+            <CardDescription className="flex items-center gap-2 text-base">
+              <Clock3 className="size-4" />
+              {dateText} · Everything important is in one quiet place.
+            </CardDescription>
+          </div>
+        </CardHeader>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-xl">
+            <Settings2 className="size-5 text-zinc-500" />
+            Customize Home
+          </CardTitle>
+          <CardDescription className="text-base">
+            Show or hide sections and move them up or down. Changes save automatically.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          {widgetPreferences.map((widget, index) => (
+            <div
+              key={widget.id}
+              className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900"
+            >
+              <div>
+                <p className="text-base font-medium text-zinc-900 dark:text-zinc-100">{widget.label}</p>
+                <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                  {widget.visible ? "Visible on Home" : "Hidden from Home"}
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  onClick={() => moveWidget(widget.id, "up")}
+                  variant="secondary"
+                  className="h-10 px-3"
+                  disabled={index === 0}
+                  aria-label={`Move ${widget.label} up`}
+                >
+                  <ArrowUp className="size-4" />
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => moveWidget(widget.id, "down")}
+                  variant="secondary"
+                  className="h-10 px-3"
+                  disabled={index === widgetPreferences.length - 1}
+                  aria-label={`Move ${widget.label} down`}
+                >
+                  <ArrowDown className="size-4" />
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => toggleWidgetVisibility(widget.id)}
+                  variant={widget.visible ? "default" : "secondary"}
+                  className="h-10 min-w-24"
+                >
+                  {widget.visible ? "Shown" : "Hidden"}
+                </Button>
+              </div>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+
+      {visibleWidgets.length === 0 ? (
+        <Card>
+          <CardContent className="pt-6">
+            <p className="rounded-xl border border-dashed border-zinc-300 bg-zinc-50 p-4 text-base text-zinc-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300">
+              All widgets are hidden. Use “Customize Home” above and switch one back to “Shown”.
+            </p>
           </CardContent>
         </Card>
-      </div>
+      ) : null}
+
+      <div className="grid gap-5 xl:grid-cols-2">{visibleWidgets.map((widget) => renderWidget(widget.id))}</div>
     </div>
   );
 }
