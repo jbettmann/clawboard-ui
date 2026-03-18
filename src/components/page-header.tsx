@@ -9,18 +9,22 @@ type PageHeaderProps = {
 
 export function PageHeader({ title, context, primaryAction, supportingStatus }: PageHeaderProps) {
   return (
-    <header className="rounded-2xl border border-[var(--color-border-default)] bg-[var(--color-surface-card)] p-6 shadow-[var(--shadow-card)]">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <div className="space-y-2">
-          <p className="text-sm uppercase tracking-[0.3em] text-[var(--color-text-muted)]">Dashboard</p>
-          <h1 className="text-3xl font-semibold leading-tight text-[var(--color-text-strong)]">{title}</h1>
-          <p className="text-sm text-[var(--color-text-muted)]">{context}</p>
-        </div>
-        <div className="flex flex-col items-start gap-3 text-right sm:items-end sm:text-right md:flex-row md:items-center md:gap-4">
-          <div className="flex flex-wrap items-center gap-2 text-sm text-[var(--color-text-muted)]">
-            {supportingStatus}
+    <header className="surface-card relative overflow-hidden p-5 sm:p-6 lg:p-7">
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[var(--color-accent-border)] to-transparent" />
+      <div className="relative flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+        <div className="max-w-3xl space-y-3">
+          <p className="eyebrow-label">Dashboard</p>
+          <div className="space-y-2">
+            <h1 className="text-3xl font-semibold leading-tight tracking-[-0.02em] text-[var(--color-text-strong)] sm:text-[2.15rem]">
+              {title}
+            </h1>
+            <p className="max-w-2xl text-sm leading-6 text-[var(--color-text-muted)] sm:text-[0.95rem]">{context}</p>
           </div>
-          <div>{primaryAction}</div>
+        </div>
+
+        <div className="flex flex-col items-start gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end sm:gap-4 lg:max-w-[46%] lg:flex-col lg:items-end xl:max-w-[42%]">
+          <div className="flex flex-wrap items-center gap-2 text-sm text-[var(--color-text-muted)]">{supportingStatus}</div>
+          <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:justify-end">{primaryAction}</div>
         </div>
       </div>
     </header>

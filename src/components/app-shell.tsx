@@ -2,15 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import {
-  BotMessageSquare,
-  Cable,
-  House,
-  ScrollText,
-  Settings2,
-  Sparkles,
-  Wrench,
-} from "lucide-react";
+import { BotMessageSquare, Cable, House, ScrollText, Settings2, Sparkles, Wrench } from "lucide-react";
 
 import { ThemeToggle } from "@/components/theme-toggle";
 import {
@@ -78,13 +70,21 @@ function AppSidebar({ pathname }: { pathname: string }) {
       <SidebarHeader>
         <div className="flex items-start justify-between gap-3">
           <div className={cn("min-w-0", !isMobile && !open ? "text-center" : "") }>
-            <p className="text-[0.7rem] font-semibold uppercase tracking-[0.4em] text-[var(--color-text-muted)]">
-              Clawboard
-            </p>
-            <h1 className={cn("mt-1 text-lg font-semibold text-[var(--color-text-strong)] transition-opacity duration-200", !isMobile && !open ? "opacity-0" : "opacity-100")}>
+            <p className="eyebrow-label">Clawboard</p>
+            <h1
+              className={cn(
+                "mt-1 text-lg font-semibold tracking-[-0.02em] text-[var(--color-text-strong)] transition-opacity duration-200",
+                !isMobile && !open ? "opacity-0" : "opacity-100",
+              )}
+            >
               Daily Companion
             </h1>
-            <p className={cn("mt-1 text-sm text-[var(--color-text-muted)] transition-opacity duration-200", !isMobile && !open ? "opacity-0" : "opacity-100")}>
+            <p
+              className={cn(
+                "mt-1 text-sm leading-6 text-[var(--color-text-muted)] transition-opacity duration-200",
+                !isMobile && !open ? "opacity-0" : "opacity-100",
+              )}
+            >
               Calm control for your OpenClaw dashboard.
             </p>
           </div>
@@ -137,23 +137,18 @@ export function AppShell({ pathname, children }: AppShellProps) {
           <AppSidebar pathname={pathname} />
 
           <SidebarInset>
-            <header className="sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-[var(--color-border-default)] bg-[color-mix(in_srgb,var(--color-surface-card)_88%,transparent)] px-[var(--page-gutter)] py-4 backdrop-blur lg:hidden">
+            <header className="sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-[var(--color-border-default)] bg-[color-mix(in_srgb,var(--color-surface-overlay)_88%,transparent)] px-[var(--page-gutter)] py-4 backdrop-blur-xl lg:hidden">
               <div className="flex items-center gap-3">
                 <SidebarTrigger />
                 <div>
-                  <p className="text-[0.7rem] font-semibold uppercase tracking-[0.35em] text-[var(--color-text-muted)]">
-                    Clawboard
-                  </p>
+                  <p className="eyebrow-label">Clawboard</p>
                   <p className="text-sm font-semibold text-[var(--color-text-strong)]">Daily Companion</p>
                 </div>
               </div>
+              <ThemeToggle compact />
             </header>
 
-            <main
-              id="main-content"
-              tabIndex={-1}
-              className="flex-1 min-w-0 w-full px-[var(--page-gutter)] py-[var(--page-gutter)]"
-            >
+            <main id="main-content" tabIndex={-1} className="min-w-0 flex-1 w-full px-[var(--page-gutter)] py-[var(--page-gutter)]">
               <div className="flex min-h-full w-full flex-col gap-[var(--panel-gap)]">{children}</div>
             </main>
           </SidebarInset>
