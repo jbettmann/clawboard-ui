@@ -26,7 +26,8 @@ export function AppShell({
         <aside className="w-full rounded-2xl border border-zinc-200/80 bg-white/90 p-4 shadow-sm md:sticky md:top-6 md:h-[calc(100vh-3rem)] md:w-72 dark:border-zinc-800/80 dark:bg-zinc-900/80">
           <div className="px-2 pb-4">
             <p className="text-xs font-medium uppercase tracking-[0.22em] text-zinc-500">Clawboard</p>
-            <h1 className="mt-2 text-lg font-semibold text-zinc-900 dark:text-zinc-50">UI Foundation</h1>
+            <h1 className="mt-2 text-lg font-semibold text-zinc-900 dark:text-zinc-50">Daily Companion</h1>
+            <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Clear, calm, and ready to help.</p>
           </div>
 
           <nav className="space-y-1">
