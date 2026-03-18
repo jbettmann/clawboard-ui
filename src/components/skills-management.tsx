@@ -58,9 +58,9 @@ const initialSkills: Skill[] = [
 ];
 
 function statusBadge(status: SkillStatus) {
-  if (status === "ready") return <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300">Ready</Badge>;
+  if (status === "ready") return <Badge className="bg-[var(--color-state-good)] text-[var(--color-surface-card)]">Ready</Badge>;
   if (status === "needs-review") {
-    return <Badge className="bg-amber-100 text-amber-800 dark:bg-amber-900/35 dark:text-amber-300">Needs review</Badge>;
+    return <Badge className="bg-[var(--color-state-watch)] text-[var(--color-surface-card)]">Needs review</Badge>;
   }
   return <Badge variant="muted">Draft</Badge>;
 }
@@ -121,7 +121,7 @@ export function SkillsManagement() {
         <CardHeader>
           <Badge variant="muted">Phase 3 · Skills</Badge>
           <CardTitle className="mt-3 flex items-center gap-2 text-2xl">
-            <Sparkles className="size-5 text-sky-500" />
+            <Sparkles className="size-5 text-[var(--color-accent-primary)]" />
             Skills management
           </CardTitle>
           <CardDescription className="text-base">
@@ -244,9 +244,9 @@ export function SkillsManagement() {
               />
             </label>
 
-            <div className="rounded-xl border border-sky-200 bg-sky-50 p-4 text-sm text-sky-900 dark:border-sky-900/40 dark:bg-sky-950/20 dark:text-sky-200">
+            <div className="rounded-xl border border-[var(--color-accent-border)] bg-[var(--color-accent-muted)] p-4 text-sm text-[var(--color-accent-foreground)]">
               <p className="flex items-center gap-2 font-medium">
-                <TriangleAlert className="size-4" />
+                <TriangleAlert className="size-4 text-[var(--color-accent-primary)]" />
                 Review tip
               </p>
               <p className="mt-1">Use short trigger guidance so routing stays predictable and easy to maintain.</p>

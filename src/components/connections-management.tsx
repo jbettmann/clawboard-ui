@@ -60,9 +60,9 @@ const initialConnections: ConnectionItem[] = [
 ];
 
 function healthBadge(health: ConnectionHealth) {
-  if (health === "healthy") return <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300">Healthy</Badge>;
-  if (health === "attention") return <Badge className="bg-amber-100 text-amber-800 dark:bg-amber-900/35 dark:text-amber-300">Needs attention</Badge>;
-  return <Badge className="bg-zinc-200 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200">Offline</Badge>;
+  if (health === "healthy") return <Badge className="bg-[var(--color-state-good)] text-[var(--color-surface-card)]">Healthy</Badge>;
+  if (health === "attention") return <Badge className="bg-[var(--color-state-watch)] text-[var(--color-surface-card)]">Needs attention</Badge>;
+  return <Badge variant="muted">Offline</Badge>;
 }
 
 function authLabel(state: AuthState) {
@@ -161,7 +161,7 @@ export function ConnectionsManagement() {
         <CardHeader>
           <Badge variant="muted">Phase 5 · Connections</Badge>
           <CardTitle className="mt-3 flex items-center gap-2 text-2xl">
-            <Cable className="size-5 text-sky-500" />
+            <Cable className="size-5 text-[var(--color-accent-primary)]" />
             Connections center
           </CardTitle>
           <CardDescription className="text-base">
@@ -292,9 +292,9 @@ export function ConnectionsManagement() {
               </div>
             ))}
 
-            <div className="rounded-xl border border-sky-200 bg-sky-50 p-4 text-sm text-sky-900 dark:border-sky-900/40 dark:bg-sky-950/20 dark:text-sky-200">
+            <div className="rounded-xl border border-[var(--color-accent-border)] bg-[var(--color-accent-muted)] p-4 text-sm text-[var(--color-accent-foreground)]">
               <p className="flex items-center gap-2 font-medium">
-                <ShieldCheck className="size-4" />
+                <ShieldCheck className="size-4 text-[var(--color-accent-primary)]" />
                 Friendly health hint
               </p>
               <p className="mt-1">If auth is valid and health is green, you can use this connection safely without extra setup.</p>
