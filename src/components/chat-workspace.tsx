@@ -367,7 +367,7 @@ export function ChatWorkspace() {
                           <RoleIcon className="size-3.5" />
                           {ROLE_LABEL_MAP[message.role]} · {formatTimestamp(message.time)}
                         </p>
-                        <p className="mt-1 text-base leading-7 text-zinc-900 dark:text-zinc-100">{message.text}</p>
+                        <p className="mt-1 text-base leading-7">{message.text}</p>
                       </div>
                     );
                   })

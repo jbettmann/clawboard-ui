@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 
 import { fetchOutputs, OutputItem } from "@/lib/openclaw-client";
 
@@ -84,11 +84,16 @@ export function ClawboardStateProvider({ children }: { children: React.ReactNode
   const [outputPreferences, setOutputPreferences] = useState<Record<string, { pinned?: boolean; saved?: boolean }>>(
     storedState.outputPreferences,
   );
+  const outputPreferencesRef = useRef(outputPreferences);
   const [outputsLoading, setOutputsLoading] = useState(true);
   const [outputsError, setOutputsError] = useState<string | null>(null);
   const [reloadToken, setReloadToken] = useState(0);
 
   const refreshOutputs = useCallback(() => setReloadToken((prev) => prev + 1), []);
+
+  useEffect(() => {
+    outputPreferencesRef.current = outputPreferences;
+  }, [outputPreferences]);
 
   useEffect(() => {
     let canceled = false;
@@ -106,7 +111,7 @@ export function ClawboardStateProvider({ children }: { children: React.ReactNode
           const previousMap = new Map(prevOutputs.map((output) => [output.id, output]));
           const sanitized = items.map((item) => {
             const previous = previousMap.get(item.id);
-            const stored = outputPreferences[item.id];
+            const stored = outputPreferencesRef.current[item.id];
             return {
               ...item,
               pinned: stored?.pinned ?? previous?.pinned ?? item.pinned ?? false,
@@ -139,7 +144,7 @@ export function ClawboardStateProvider({ children }: { children: React.ReactNode
       canceled = true;
       clearTimeout(timer);
     };
-  }, [outputPreferences, reloadToken]);
+  }, [reloadToken]);
 
   useEffect(() => {
     if (typeof window === "undefined") {
