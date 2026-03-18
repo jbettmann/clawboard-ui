@@ -24,7 +24,7 @@ export function OutputsManagement() {
         <CardHeader>
           <Badge variant="muted">Phase 4 · Outputs</Badge>
           <CardTitle className="mt-3 flex items-center gap-2 text-2xl">
-            <ScrollText className="size-5 text-sky-500" />
+            <ScrollText className="size-5 text-[var(--color-accent-primary)]" />
             Outputs center
           </CardTitle>
           <CardDescription className="text-base">
@@ -59,7 +59,7 @@ export function OutputsManagement() {
                 </div>
                 <p className="mt-1 text-sm opacity-85">{output.summary}</p>
                 <div className="mt-3 flex items-center gap-2">
-                  {output.pinned ? <Badge className="bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-300">Pinned</Badge> : null}
+                  {output.pinned ? <Badge>Pinned</Badge> : null}
                   {output.saved ? <Badge variant="muted">Saved</Badge> : null}
                 </div>
               </button>
@@ -100,8 +100,8 @@ export function OutputsManagement() {
                 {selectedOutput.saved ? "Saved" : "Save output"}
               </Button>
 
-              <div className="flex items-center gap-2 rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-sm text-sky-900 dark:border-sky-900/40 dark:bg-sky-950/20 dark:text-sky-200">
-                <Sparkles className="size-4" />
+              <div className="flex items-center gap-2 rounded-xl border border-[var(--color-accent-border)] bg-[var(--color-accent-muted)] px-3 py-2 text-sm text-[var(--color-accent-foreground)]">
+                <Sparkles className="size-4 text-[var(--color-accent-primary)]" />
                 Pinning makes this item appear on Home automatically.
               </div>
             </div>

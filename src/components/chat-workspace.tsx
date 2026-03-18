@@ -86,8 +86,10 @@ const initialMessages: ChatMessage[] = [
 ];
 
 function activityBadge(tone: ChatSession["activity"]) {
-  if (tone === "active") return <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300">Active now</Badge>;
-  if (tone === "waiting") return <Badge className="bg-amber-100 text-amber-800 dark:bg-amber-900/35 dark:text-amber-300">Waiting</Badge>;
+  if (tone === "active")
+    return <Badge className="bg-[var(--color-state-good)] text-[var(--color-surface-card)]">Active now</Badge>;
+  if (tone === "waiting")
+    return <Badge className="bg-[var(--color-state-watch)] text-[var(--color-surface-card)]">Waiting</Badge>;
   return <Badge variant="muted">Complete</Badge>;
 }
 
@@ -132,8 +134,8 @@ export function ChatWorkspace() {
       <Card>
         <CardHeader>
           <Badge variant="muted">Phase 5 · Chat</Badge>
-          <CardTitle className="mt-3 flex items-center gap-2 text-2xl">
-            <BotMessageSquare className="size-5 text-sky-500" />
+            <CardTitle className="mt-3 flex items-center gap-2 text-2xl">
+              <BotMessageSquare className="size-5 text-[var(--color-accent-primary)]" />
             Chat workspace
           </CardTitle>
           <CardDescription className="text-base">
@@ -219,7 +221,7 @@ export function ChatWorkspace() {
                   className={`max-w-[90%] rounded-2xl border px-4 py-3 ${
                     message.role === "assistant"
                       ? "border-zinc-200 bg-zinc-50 text-zinc-900 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100"
-                      : "ml-auto border-sky-200 bg-sky-50 text-sky-900 dark:border-sky-900/40 dark:bg-sky-950/25 dark:text-sky-100"
+                      : "ml-auto border-[var(--color-accent-border)] bg-[var(--color-accent-muted)] text-[var(--color-accent-foreground)]"
                   }`}
                 >
                   <p className="flex items-center gap-2 text-xs font-medium opacity-75">

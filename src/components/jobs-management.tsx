@@ -120,7 +120,7 @@ export function JobsManagement() {
         <CardHeader>
           <Badge variant="muted">Phase 3 · Jobs</Badge>
           <CardTitle className="mt-3 flex items-center gap-2 text-2xl">
-            <Wrench className="size-5 text-sky-500" />
+            <Wrench className="size-5 text-[var(--color-accent-primary)]" />
             Jobs management
           </CardTitle>
           <CardDescription className="text-base">

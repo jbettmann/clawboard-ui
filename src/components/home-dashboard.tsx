@@ -86,7 +86,7 @@ export function HomeDashboard() {
         <Card key={id}>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-xl">
-              <Sparkles className="size-5 text-sky-500" />
+              <Sparkles className="size-5 text-[var(--color-accent-primary)]" />
               Morning brief
             </CardTitle>
             <CardDescription className="text-base">
@@ -230,7 +230,7 @@ export function HomeDashboard() {
             <Badge variant="muted" className="text-[11px]">
               Home Dashboard
             </Badge>
-            <Badge className="bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-300">Calm Mode</Badge>
+            <Badge>Calm Mode</Badge>
           </div>
 
           <div className="space-y-2">

@@ -50,7 +50,7 @@ export function StatusHistory() {
         <CardHeader>
           <Badge variant="muted">Phase 5 · Status & History</Badge>
           <CardTitle className="mt-3 flex items-center gap-2 text-2xl">
-            <Activity className="size-5 text-sky-500" />
+            <Activity className="size-5 text-[var(--color-accent-primary)]" />
             Status and history
           </CardTitle>
           <CardDescription className="text-base">
