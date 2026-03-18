@@ -37,6 +37,8 @@ Copy `.env.example` to `.env.local` and adjust values as needed:
 cp .env.example .env.local
 ```
 
+Compatibility-specific settings for OpenClaw gateway/API/auth are documented in `docs/OPENCLAW_COMPATIBILITY.md`.
+
 ## Scripts
 
 ```bash
@@ -45,6 +47,12 @@ npm run lint   # run ESLint
 npm run build  # create production build
 npm run start  # run production build
 ```
+
+## OpenClaw Drop-In Compatibility (Phase 6)
+
+- See `docs/OPENCLAW_COMPATIBILITY.md` for the wiring map, assumptions, switch-over steps, and rollback steps.
+- Compatibility layer lives at `src/lib/openclaw-compat.ts`.
+- `Connections` UI now includes a live compatibility snapshot (gateway/API/auth mode) based on env vars.
 
 ## UI Foundation Notes
 

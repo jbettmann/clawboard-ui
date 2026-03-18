@@ -6,6 +6,7 @@ import { BadgeCheck, Cable, CheckCircle2, CircleAlert, HeartPulse, KeyRound, Lin
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { getOpenClawCompatibilityConfig, resolveApiBaseUrl } from "@/lib/openclaw-compat";
 
 type ConnectionHealth = "healthy" | "attention" | "offline";
 type AuthState = "connected" | "needs-auth" | "not-connected";
@@ -76,6 +77,7 @@ export function ConnectionsManagement() {
   const [statusNote, setStatusNote] = useState<string>("No recent action");
 
   const selected = connections.find((item) => item.id === selectedId) ?? connections[0];
+  const compat = getOpenClawCompatibilityConfig();
 
   const summary = useMemo(() => {
     const healthy = connections.filter((item) => item.health === "healthy").length;
@@ -303,6 +305,24 @@ export function ConnectionsManagement() {
                 <li>Healthy = ready now.</li>
                 <li>Needs attention = usually sign-in or quality check.</li>
                 <li>Offline = currently unavailable, reconnect when needed.</li>
+              </ul>
+            </div>
+
+            <div className="rounded-xl border border-zinc-200 bg-white p-4 text-sm text-zinc-700 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300">
+              <p className="font-medium">OpenClaw compatibility snapshot</p>
+              <ul className="mt-2 space-y-1">
+                <li>
+                  <span className="text-zinc-500 dark:text-zinc-400">UI mode:</span> {compat.uiMode}
+                </li>
+                <li>
+                  <span className="text-zinc-500 dark:text-zinc-400">Gateway:</span> {compat.gatewayUrl}
+                </li>
+                <li>
+                  <span className="text-zinc-500 dark:text-zinc-400">API base:</span> {resolveApiBaseUrl(compat)}
+                </li>
+                <li>
+                  <span className="text-zinc-500 dark:text-zinc-400">Auth mode:</span> {compat.authMode}
+                </li>
               </ul>
             </div>
           </CardContent>
