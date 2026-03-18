@@ -87,7 +87,11 @@ npm run start  # run production build
 
 - See `docs/OPENCLAW_COMPATIBILITY.md` for the wiring map, assumptions, switch-over steps, and rollback steps.
 - Compatibility layer lives at `src/lib/openclaw-compat.ts`.
-- `Connections` UI now includes a live compatibility snapshot (gateway/API/auth mode) based on env vars.
+
+## Observability & Troubleshooting (Phase 7)
+
+- `Connections` surfaces the live gateway, node, auth, and connectivity posture with guidance on what is broken, what it impacts, and what to do next.
+- `Status & history` distills snapshots into impact/next-step cards, highlights timeline events in plain language, and adds a prioritized troubleshooting plan.
 
 ## Packaging & Installability (Phase 7)
 

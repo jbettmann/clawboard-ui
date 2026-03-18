@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { BadgeCheck, CheckCircle2, CircleAlert, HeartPulse, RefreshCcw, ShieldCheck } from "lucide-react";
 
@@ -24,6 +25,81 @@ function authLabel(state: Connection["auth"]) {
   return "Not connected";
 }
 
+type FocusTone = "good" | "watch" | "offline";
+
+type FocusState = {
+  tone: FocusTone;
+  title: string;
+  detail: string;
+  action?: { label: string; href: string };
+};
+
+type ConnectionStep = {
+  label: string;
+  detail: string;
+  ok: boolean;
+  action: string;
+  actionHref?: string;
+};
+
+function focusToneClasses(tone: FocusTone) {
+  if (tone === "good") {
+    return "border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-900/40 dark:bg-emerald-950/20 dark:text-emerald-100";
+  }
+  if (tone === "watch") {
+    return "border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-900/40 dark:bg-amber-950/20 dark:text-amber-100";
+  }
+  return "border-zinc-300 bg-zinc-100 text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100";
+}
+
+function describeFocusState(connection: Connection | null): FocusState | null {
+  if (!connection) {
+    return null;
+  }
+
+  if (connection.health === "offline") {
+    return {
+      tone: "offline",
+      title: "Offline and paused",
+      detail:
+        "This gateway is not reachable right now. Confirm the gateway network and restart the service if needed.",
+      action: { label: "Open status & history", href: "/settings/advanced" },
+    };
+  }
+
+  if (connection.auth !== "connected") {
+    return {
+      tone: "watch",
+      title: "Authentication needed",
+      detail: "Credentials need refreshing so the gateway can resume handling traffic safely.",
+      action: { label: "Open settings", href: "/settings" },
+    };
+  }
+
+  if (connection.health === "attention") {
+    return {
+      tone: "watch",
+      title: "Attention recommended",
+      detail:
+        "Gateway is online but flagged for review. Take a minute to check latency and connected devices before relying on it.",
+      action: { label: "Open status & history", href: "/settings/advanced" },
+    };
+  }
+
+  return {
+    tone: "good",
+    title: "Ready to route traffic",
+    detail: "Auth and health are green. Keep monitoring, and let this connection serve as expected.",
+  };
+}
+
+function actionLinkLabel(href: string) {
+  if (href.includes("/settings/advanced")) {
+    return "View status & history";
+  }
+  return "Open settings";
+}
+
 export function ConnectionsManagement() {
   const { status, data, error, refresh } = useOpenClawResource<Connection[]>(fetchConnections, []);
   const connections = useMemo(() => data ?? [], [data]);
@@ -40,15 +116,27 @@ export function ConnectionsManagement() {
     return { healthy, attention, offline };
   }, [connections]);
 
+  const focusState = useMemo(() => describeFocusState(detailConnection), [detailConnection]);
+
   const header = (
     <PageHeader
       title="Connections center"
-      context="Live gateway and device health with step-by-step clarity."
+      context="Live gateway and device health with calm clarity and ready next steps."
       supportingStatus={
         <>
-          {detailConnection ? healthBadge(detailConnection.health) : <Badge variant="muted">Awaiting data</Badge>}
-          <Badge variant="muted">{detailConnection ? authLabel(detailConnection.auth) : "Auth status pending"}</Badge>
-          {detailConnection ? <Badge variant="muted">Latency: {detailConnection.latency}</Badge> : null}
+          {detailConnection ? (
+            <>
+              <Badge variant="muted">{detailConnection.type}</Badge>
+              {healthBadge(detailConnection.health)}
+              <Badge variant="muted">{authLabel(detailConnection.auth)}</Badge>
+              <Badge variant="muted">Latency: {detailConnection.latency}</Badge>
+            </>
+          ) : (
+            <>
+              <Badge variant="muted">Device info pending</Badge>
+              <Badge variant="muted">Health pending</Badge>
+            </>
+          )}
         </>
       }
       primaryAction={
@@ -103,28 +191,54 @@ export function ConnectionsManagement() {
     );
   }
 
-  const steps = [
+  const steps: ConnectionStep[] = [
     {
-      label: "1) Check sign-in",
+      label: "Sign-in health",
       detail: detailConnection
         ? detailConnection.auth === "connected"
-          ? "Signed in and valid."
-          : "Authentication is required."
+          ? "Signed in and current."
+          : "Authentication is paused; refresh credentials."
         : "Awaiting data.",
-      ok: detailConnection?.auth === "connected",
+      ok: Boolean(detailConnection?.auth === "connected"),
+      action: detailConnection
+        ? detailConnection.auth === "connected"
+          ? "Credentials are current."
+          : "Open Settings to refresh the gateway authentication."
+        : "Once the data arrives, this card will guide you.",
+      actionHref: detailConnection && detailConnection.auth !== "connected" ? "/settings" : undefined,
     },
     {
-      label: "2) Verify connection",
-      detail: detailConnection?.health === "healthy" ? "Connection quality is stable." : "Investigate health or re-connect.",
-      ok: detailConnection?.health === "healthy",
+      label: "Connection quality",
+      detail: detailConnection
+        ? detailConnection.health === "healthy"
+          ? "Connection quality is stable."
+          : detailConnection.health === "attention"
+          ? "Gateway is online but marked for a closer look."
+          : "This gateway is currently offline."
+        : "Awaiting data.",
+      ok: Boolean(detailConnection?.health === "healthy"),
+      action: detailConnection
+        ? detailConnection.health === "healthy"
+          ? "Latency is steady."
+          : detailConnection.health === "attention"
+          ? "Review network and device health, then revisit."
+          : "Confirm the gateway is reachable and restart if needed."
+        : "Waiting on the connection snapshot.",
+      actionHref: detailConnection && detailConnection.health !== "healthy" ? "/settings/advanced" : undefined,
     },
     {
-      label: "3) Confirm ready state",
-      detail:
-        detailConnection?.health === "healthy" && detailConnection?.auth === "connected"
-          ? "This connection is ready to use."
-          : "Resolve the steps above before relying on this node.",
-      ok: detailConnection?.health === "healthy" && detailConnection?.auth === "connected",
+      label: "Ready to serve",
+      detail: detailConnection
+        ? detailConnection.health === "healthy" && detailConnection.auth === "connected"
+          ? "Connection is ready to handle requests."
+          : "Resolve auth or health signals before relying on this node."
+        : "Awaiting data.",
+      ok: detailConnection ? detailConnection.health === "healthy" && detailConnection.auth === "connected" : false,
+      action: detailConnection
+        ? detailConnection.health === "healthy" && detailConnection.auth === "connected"
+          ? "This node is cleared for live use."
+          : "Follow the guidance above to restore readiness."
+        : "Steps appear once data arrives.",
     },
   ];
 
@@ -139,7 +253,7 @@ export function ConnectionsManagement() {
               <HeartPulse className="size-4 text-zinc-500" />
               Health at a glance
             </CardTitle>
-            <CardDescription>Signal counts pulled directly from OpenClaw.</CardDescription>
+            <CardDescription>Counts refresh live so you can focus on connections that need attention.</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3">
             <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 dark:border-emerald-900/40 dark:bg-emerald-950/20">
@@ -160,7 +274,7 @@ export function ConnectionsManagement() {
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle>Connection list</CardTitle>
-            <CardDescription>Choose a connection to inspect authentication and health.</CardDescription>
+            <CardDescription>Choose a gateway to see live health, auth state, and calm next steps.</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3 md:grid-cols-2">
             {connections.map((item) => (
@@ -200,7 +314,26 @@ export function ConnectionsManagement() {
             <CardTitle className="mt-3 text-2xl">{detailConnection?.name}</CardTitle>
             <CardDescription className="text-base">{detailConnection?.note}</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-5">
+            {focusState ? (
+              <div className={`rounded-2xl border p-4 ${focusToneClasses(focusState.tone)}`}>
+                <p className="text-xs uppercase tracking-[0.3em] text-[var(--color-text-muted)]">
+                  {focusState.tone === "good" ? "Ready" : focusState.tone === "watch" ? "Watch" : "Offline"}
+                </p>
+                <p className="mt-2 text-lg font-semibold text-[var(--color-text-strong)]">{focusState.title}</p>
+                <p className="mt-1 text-sm text-zinc-700 dark:text-zinc-300">{focusState.detail}</p>
+                {focusState.action ? (
+                  <Button asChild size="sm" variant="ghost" className="mt-3">
+                    <Link href={focusState.action.href}>{focusState.action.label}</Link>
+                  </Button>
+                ) : null}
+              </div>
+            ) : (
+              <p className="rounded-2xl border border-dashed border-zinc-300 bg-zinc-50 px-4 py-3 text-sm text-zinc-600 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300">
+                Pick a connection to see a calm summary of its readiness.
+              </p>
+            )}
+
             <div className="grid gap-3 md:grid-cols-3">
               <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-800 dark:bg-zinc-900">
                 <p className="text-xs text-zinc-500">Auth status</p>
@@ -223,7 +356,7 @@ export function ConnectionsManagement() {
             </div>
 
             <p className="text-sm text-zinc-500 dark:text-zinc-400" aria-live="polite">
-              {detailConnection ? `Status note: ${detailConnection.note}` : "Awaiting details..."}
+              {detailConnection ? `Latest note: ${detailConnection.note}` : "Awaiting details..."}
             </p>
           </CardContent>
         </Card>
@@ -248,31 +381,43 @@ export function ConnectionsManagement() {
                   {step.label}
                 </p>
                 <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{step.detail}</p>
+                <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
+                  {step.action}
+                  {step.actionHref ? (
+                    <>
+                      {" "}
+                      <Link href={step.actionHref} className="font-semibold text-[var(--color-accent-primary)]">
+                        {actionLinkLabel(step.actionHref)}
+                      </Link>
+                    </>
+                  ) : null}
+                </p>
               </div>
             ))}
 
             <div className="rounded-xl border border-[var(--color-accent-border)] bg-[var(--color-accent-muted)] p-4 text-sm text-[var(--color-accent-foreground)]">
               <p className="flex items-center gap-2 font-medium">
                 <ShieldCheck className="size-4 text-[var(--color-accent-primary)]" />
-                Friendly health hint
+                Peaceful health reminder
               </p>
-              <p className="mt-1">If auth and health are green, this connection is ready to use.</p>
+              <p className="mt-1">When auth and health stay green, you can rely on this gateway for steady work.</p>
             </div>
 
             <div className="rounded-xl border border-zinc-200 bg-white p-4 text-sm text-zinc-700 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300">
               <p className="flex items-center gap-2 font-medium">
                 <BadgeCheck className="size-4 text-zinc-500" />
-                Status language guide
+                Tone key
               </p>
               <ul className="mt-2 list-disc space-y-1 pl-5">
-                <li>Healthy = ready now.</li>
-                <li>Needs attention = usually sign-in or quality check.</li>
-                <li>Offline = currently unavailable.</li>
+                <li>Healthy = ready for now.</li>
+                <li>Needs attention = re-check auth or review the connection quality.</li>
+                <li>Offline = this node is unavailable until the gateway revives.</li>
               </ul>
             </div>
 
             <div className="rounded-xl border border-zinc-200 bg-white p-4 text-sm text-zinc-700 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300">
-              <p className="font-medium">OpenClaw compatibility snapshot</p>
+              <p className="font-medium">Deployment context</p>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400">Where Clawboard is currently pointed.</p>
               <ul className="mt-2 space-y-1">
                 <li>
                   <span className="text-zinc-500 dark:text-zinc-400">UI mode:</span> {compat.uiMode}
