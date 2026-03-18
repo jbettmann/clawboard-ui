@@ -1,11 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Activity, ArrowRight, BotMessageSquare, Clock3, Send, UserRound } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageHeader } from "@/components/page-header";
 
 type ChatSession = {
   id: string;
@@ -97,12 +98,17 @@ export function ChatWorkspace() {
   const [selectedSessionId, setSelectedSessionId] = useState<string>(sessions[0].id);
   const [composerText, setComposerText] = useState<string>("");
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
+  const composerRef = useRef<HTMLTextAreaElement | null>(null);
 
   const selectedSession = sessions.find((session) => session.id === selectedSessionId) ?? sessions[0];
   const sessionMessages = useMemo(
     () => messages.filter((message) => message.sessionId === selectedSession.id),
     [messages, selectedSession.id],
   );
+
+  function focusComposer() {
+    composerRef.current?.focus();
+  }
 
   function sendMessage() {
     const trimmed = composerText.trim();
@@ -131,18 +137,21 @@ export function ChatWorkspace() {
 
   return (
     <div className="space-y-5 pb-6">
-      <Card>
-        <CardHeader>
-          <Badge variant="muted">Phase 5 · Chat</Badge>
-            <CardTitle className="mt-3 flex items-center gap-2 text-2xl">
-              <BotMessageSquare className="size-5 text-[var(--color-accent-primary)]" />
-            Chat workspace
-          </CardTitle>
-          <CardDescription className="text-base">
-            A calm conversation surface with clear session status, readable messages, and simple activity cues.
-          </CardDescription>
-        </CardHeader>
-      </Card>
+      <PageHeader
+        title="Chat workspace"
+        context="Guided conversations with clear session signals and tidy history."
+        supportingStatus={
+          <>
+            {activityBadge(selectedSession.activity)}
+            <Badge variant="muted">{selectedSession.channel}</Badge>
+          </>
+        }
+        primaryAction={
+          <Button onClick={focusComposer} size="lg" variant="secondary">
+            Focus composer
+          </Button>
+        }
+      />
 
       <div className="grid gap-5 xl:grid-cols-[300px_1fr]">
         <Card>
@@ -239,6 +248,7 @@ export function ChatWorkspace() {
               </label>
               <textarea
                 id="chat-compose"
+                ref={composerRef}
                 value={composerText}
                 onChange={(event) => setComposerText(event.target.value)}
                 placeholder="Type a clear next step or question…"

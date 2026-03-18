@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRef } from "react";
 import {
   AlarmClock,
   ArrowDown,
@@ -8,7 +9,6 @@ import {
   ArrowUp,
   CheckCircle2,
   CircleDashed,
-  Clock3,
   FileText,
   Pin,
   PlayCircle,
@@ -22,6 +22,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageHeader } from "@/components/page-header";
 import { HomeWidgetId, useClawboardState } from "@/lib/clawboard-state";
 
 type StatusTone = "good" | "watch" | "neutral";
@@ -70,15 +71,13 @@ function signalToneIcon(tone: StatusTone) {
 export function HomeDashboard() {
   const { outputs, widgetPreferences, moveWidget, toggleWidgetVisibility } = useClawboardState();
 
-  const today = new Date();
-  const dateText = new Intl.DateTimeFormat("en-US", {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-  }).format(today);
-
   const pinnedOutputs = outputs.filter((item) => item.pinned);
   const visibleWidgets = widgetPreferences.filter((item) => item.visible);
+  const customizationRef = useRef<HTMLDivElement | null>(null);
+
+  function focusCustomization() {
+    customizationRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 
   function renderWidget(id: HomeWidgetId) {
     if (id === "morning-brief") {
@@ -224,86 +223,83 @@ export function HomeDashboard() {
 
   return (
     <div className="space-y-5 pb-6">
-      <Card className="border-zinc-200/90 bg-white dark:bg-zinc-900/80">
-        <CardHeader className="space-y-4">
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="muted" className="text-[11px]">
-              Home Dashboard
-            </Badge>
-            <Badge>Calm Mode</Badge>
-          </div>
+      <PageHeader
+        title="Home dashboard"
+        context="Calm, clear signals for today plus quick actions and personalization."
+        supportingStatus={
+          <>
+            <Badge variant="muted">Daily companion</Badge>
+            <Badge>Calm mode</Badge>
+          </>
+        }
+        primaryAction={
+          <Button onClick={focusCustomization} size="lg" variant="secondary">
+            Customize home
+          </Button>
+        }
+      />
 
-          <div className="space-y-2">
-            <CardTitle className="text-3xl font-semibold leading-tight text-zinc-900 dark:text-zinc-50">
-              Good morning. Here is your day at a glance.
+      <div ref={customizationRef}>
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-xl">
+              <Settings2 className="size-5 text-zinc-500" />
+              Customize Home
             </CardTitle>
-            <CardDescription className="flex items-center gap-2 text-base">
-              <Clock3 className="size-4" />
-              {dateText} · Everything important is in one quiet place.
+            <CardDescription className="text-base">
+              Show or hide sections and move them up or down. Changes save automatically.
             </CardDescription>
-          </div>
-        </CardHeader>
-      </Card>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {widgetPreferences.map((widget, index) => (
+              <div
+                key={widget.id}
+                className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900"
+              >
+                <div>
+                  <p className="text-base font-medium text-zinc-900 dark:text-zinc-100">{widget.label}</p>
+                  <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                    {widget.visible ? "Visible on Home" : "Hidden from Home"}
+                  </p>
+                </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-xl">
-            <Settings2 className="size-5 text-zinc-500" />
-            Customize Home
-          </CardTitle>
-          <CardDescription className="text-base">
-            Show or hide sections and move them up or down. Changes save automatically.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          {widgetPreferences.map((widget, index) => (
-            <div
-              key={widget.id}
-              className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900"
-            >
-              <div>
-                <p className="text-base font-medium text-zinc-900 dark:text-zinc-100">{widget.label}</p>
-                <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                  {widget.visible ? "Visible on Home" : "Hidden from Home"}
-                </p>
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    onClick={() => moveWidget(widget.id, "up")}
+                    variant="secondary"
+                    className="h-10 px-3"
+                    disabled={index === 0}
+                    aria-label={`Move ${widget.label} up`}
+                  >
+                    <ArrowUp className="size-4" />
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={() => moveWidget(widget.id, "down")}
+                    variant="secondary"
+                    className="h-10 px-3"
+                    disabled={index === widgetPreferences.length - 1}
+                    aria-label={`Move ${widget.label} down`}
+                  >
+                    <ArrowDown className="size-4" />
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={() => toggleWidgetVisibility(widget.id)}
+                    variant={widget.visible ? "default" : "secondary"}
+                    className="h-10 min-w-24"
+                    aria-pressed={widget.visible}
+                    aria-label={`${widget.visible ? "Hide" : "Show"} ${widget.label}`}
+                  >
+                    {widget.visible ? "Shown" : "Hidden"}
+                  </Button>
+                </div>
               </div>
-
-              <div className="flex items-center gap-2">
-                <Button
-                  type="button"
-                  onClick={() => moveWidget(widget.id, "up")}
-                  variant="secondary"
-                  className="h-10 px-3"
-                  disabled={index === 0}
-                  aria-label={`Move ${widget.label} up`}
-                >
-                  <ArrowUp className="size-4" />
-                </Button>
-                <Button
-                  type="button"
-                  onClick={() => moveWidget(widget.id, "down")}
-                  variant="secondary"
-                  className="h-10 px-3"
-                  disabled={index === widgetPreferences.length - 1}
-                  aria-label={`Move ${widget.label} down`}
-                >
-                  <ArrowDown className="size-4" />
-                </Button>
-                <Button
-                  type="button"
-                  onClick={() => toggleWidgetVisibility(widget.id)}
-                  variant={widget.visible ? "default" : "secondary"}
-                  className="h-10 min-w-24"
-                  aria-pressed={widget.visible}
-                  aria-label={`${widget.visible ? "Hide" : "Show"} ${widget.label}`}
-                >
-                  {widget.visible ? "Shown" : "Hidden"}
-                </Button>
-              </div>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
+            ))}
+          </CardContent>
+        </Card>
+      </div>
 
       {visibleWidgets.length === 0 ? (
         <Card>

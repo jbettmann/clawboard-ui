@@ -1,8 +1,37 @@
-import Link from "next/link";
-import { BotMessageSquare, Cable, House, ScrollText, Settings2, Sparkles, Wrench } from "lucide-react";
+"use client";
 
-import { cn } from "@/lib/utils";
+import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
+import {
+  BotMessageSquare,
+  Cable,
+  House,
+  ScrollText,
+  Settings2,
+  Sparkles,
+  Wrench,
+} from "lucide-react";
+
 import { ThemeToggle } from "@/components/theme-toggle";
+import {
+  Sidebar,
+  SidebarClose,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarInset,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+  SidebarTrigger,
+  useSidebar,
+} from "@/components/ui/sidebar";
+import { cn } from "@/lib/utils";
+
+const SIDEBAR_PREFERENCE_KEY = "clawboard-ui-sidebar-collapsed";
 
 const navItems = [
   { href: "/", label: "Home", icon: House },
@@ -14,63 +43,116 @@ const navItems = [
   { href: "/settings", label: "Settings", icon: Settings2 },
 ];
 
-export function AppShell({
-  pathname,
-  children,
-}: {
+type AppShellProps = {
   pathname: string;
   children: React.ReactNode;
-}) {
+};
+
+function AppSidebar({ pathname }: { pathname: string }) {
+  const { open, isMobile, setOpenMobile } = useSidebar();
+
+  const renderedNav = useMemo(
+    () =>
+      navItems.map((item) => {
+        const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
+        const Icon = item.icon;
+
+        return (
+          <SidebarMenuItem key={item.href}>
+            <SidebarMenuButton asChild isActive={active} tooltip={item.label}>
+              <Link href={item.href} onClick={() => isMobile && setOpenMobile(false)}>
+                <Icon className="size-5 shrink-0" aria-hidden="true" />
+                <span className={cn("truncate transition-opacity duration-200", !isMobile && !open ? "opacity-0" : "opacity-100")}>
+                  {item.label}
+                </span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        );
+      }),
+    [isMobile, open, pathname, setOpenMobile],
+  );
+
   return (
-    <div className="min-h-screen w-full">
-      <a href="#main-content" className="skip-link">
-        Skip to main content
-      </a>
-
-      <div className="flex min-h-screen w-full flex-col gap-[var(--panel-gap)] px-[var(--page-gutter)] py-[var(--page-gutter)] lg:flex-row lg:items-start">
-        <aside
-          className="surface-card flex w-full flex-col gap-8 p-5 lg:w-72 lg:sticky lg:top-[var(--page-gutter)]"
-          aria-label="Primary"
-        >
-          <div className="space-y-1">
-            <p className="text-xs font-semibold uppercase tracking-[0.4em] text-[var(--color-text-muted)]">Clawboard</p>
-            <h1 className="text-lg font-semibold text-[var(--color-text-strong)]">Daily Companion</h1>
-            <p className="text-sm text-[var(--color-text-muted)]">Clear, calm, and ready to help.</p>
+    <Sidebar>
+      <SidebarHeader>
+        <div className="flex items-start justify-between gap-3">
+          <div className={cn("min-w-0", !isMobile && !open ? "text-center" : "") }>
+            <p className="text-[0.7rem] font-semibold uppercase tracking-[0.4em] text-[var(--color-text-muted)]">
+              Clawboard
+            </p>
+            <h1 className={cn("mt-1 text-lg font-semibold text-[var(--color-text-strong)] transition-opacity duration-200", !isMobile && !open ? "opacity-0" : "opacity-100")}>
+              Daily Companion
+            </h1>
+            <p className={cn("mt-1 text-sm text-[var(--color-text-muted)] transition-opacity duration-200", !isMobile && !open ? "opacity-0" : "opacity-100")}>
+              Calm control for your OpenClaw dashboard.
+            </p>
           </div>
-
-          <nav className="space-y-1" aria-label="Main navigation">
-            {navItems.map((item) => {
-              const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
-              const Icon = item.icon;
-
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  aria-current={active ? "page" : undefined}
-                  className={cn(
-                    "flex items-center gap-3 rounded-[var(--radius-md)] px-3 py-2 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)] focus-visible:ring-offset-0",
-                    active
-                      ? "bg-[var(--color-accent-muted)] text-[var(--color-accent-foreground)]"
-                      : "text-[var(--color-text-muted)] hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text-strong)]",
-                  )}
-                >
-                  <Icon className="size-4 text-inherit" aria-hidden="true" />
-                  <span>{item.label}</span>
-                </Link>
-              );
-            })}
-          </nav>
-
-          <div className="mt-auto border-t border-[var(--color-border-default)] pt-4">
-            <ThemeToggle />
+          <div className="flex shrink-0 items-center gap-2">
+            <SidebarTrigger className="hidden lg:inline-flex" />
+            <SidebarClose />
           </div>
-        </aside>
+        </div>
+      </SidebarHeader>
 
-        <main id="main-content" tabIndex={-1} className="min-w-0 flex-1">
-          {children}
-        </main>
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+          <SidebarMenu>{renderedNav}</SidebarMenu>
+        </SidebarGroup>
+      </SidebarContent>
+
+      <SidebarFooter>
+        <ThemeToggle compact={!isMobile && !open} />
+      </SidebarFooter>
+    </Sidebar>
+  );
+}
+
+export function AppShell({ pathname, children }: AppShellProps) {
+  const [sidebarOpen, setSidebarOpen] = useState(() => {
+    if (typeof window === "undefined") {
+      return true;
+    }
+    return window.localStorage.getItem(SIDEBAR_PREFERENCE_KEY) !== "true";
+  });
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    window.localStorage.setItem(SIDEBAR_PREFERENCE_KEY, sidebarOpen ? "false" : "true");
+  }, [sidebarOpen]);
+
+  return (
+    <SidebarProvider open={sidebarOpen} onOpenChange={setSidebarOpen}>
+      <div className="min-h-screen w-full bg-[var(--color-surface-base)] text-[var(--color-text-default)]">
+        <a href="#main-content" className="skip-link">
+          Skip to main content
+        </a>
+
+        <div className="flex min-h-screen w-full">
+          <AppSidebar pathname={pathname} />
+
+          <SidebarInset>
+            <header className="sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-[var(--color-border-default)] bg-[color-mix(in_srgb,var(--color-surface-card)_88%,transparent)] px-[var(--page-gutter)] py-4 backdrop-blur lg:hidden">
+              <div className="flex items-center gap-3">
+                <SidebarTrigger />
+                <div>
+                  <p className="text-[0.7rem] font-semibold uppercase tracking-[0.35em] text-[var(--color-text-muted)]">
+                    Clawboard
+                  </p>
+                  <p className="text-sm font-semibold text-[var(--color-text-strong)]">Daily Companion</p>
+                </div>
+              </div>
+            </header>
+
+            <main id="main-content" tabIndex={-1} className="flex-1 px-[var(--page-gutter)] py-[var(--page-gutter)]">
+              <div className="flex min-h-full w-full flex-col gap-[var(--panel-gap)]">{children}</div>
+            </main>
+          </SidebarInset>
+        </div>
       </div>
-    </div>
+    </SidebarProvider>
   );
 }
