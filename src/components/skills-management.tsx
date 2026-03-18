@@ -148,6 +148,8 @@ export function SkillsManagement() {
                   key={skill.id}
                   type="button"
                   onClick={() => selectSkill(skill.id)}
+                  aria-pressed={selectedId === skill.id}
+                  aria-label={`Edit skill ${skill.name}`}
                   className={`w-full rounded-xl border p-3 text-left transition-colors ${
                     selectedId === skill.id
                       ? "border-zinc-900 bg-zinc-900 text-zinc-50 dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900"
@@ -258,7 +260,9 @@ export function SkillsManagement() {
               <Button onClick={resetForm} variant="secondary" className="h-11 px-5 text-base">
                 Reset form
               </Button>
-              <p className="text-sm text-zinc-500 dark:text-zinc-400">{savedAt}</p>
+              <p className="text-sm text-zinc-500 dark:text-zinc-400" aria-live="polite">
+                {savedAt}
+              </p>
             </div>
           </CardContent>
         </Card>

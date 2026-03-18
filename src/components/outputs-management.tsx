@@ -45,6 +45,8 @@ export function OutputsManagement() {
                 key={output.id}
                 type="button"
                 onClick={() => setSelectedOutputId(output.id)}
+                aria-pressed={selectedOutput.id === output.id}
+                aria-label={`Open output ${output.title}`}
                 className={`w-full rounded-xl border p-4 text-left transition-colors ${
                   selectedOutput.id === output.id
                     ? "border-zinc-900 bg-zinc-900 text-zinc-50 dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900"
