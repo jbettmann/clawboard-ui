@@ -1,4 +1,4 @@
-# Clawboard UI – Product Plan (Phases 1–5)
+# Clawboard UI – Product Plan (Phases 1–6)
 
 ## Approved Plan
 
@@ -44,6 +44,13 @@
 5. Keep design calm, modern, intuitive, and elderly-friendly.
 6. Preserve buildability and validation confidence after Phase 5 implementation.
 
+### Phase 6 — Drop-In Compatibility + Integration Notes
+1. Add a clear compatibility layer for OpenClaw gateway/API/auth wiring assumptions.
+2. Document a realistic minimal-effort drop-in path from stock OpenClaw UI to clawboard-ui.
+3. Document explicit rollback steps to return to the stock UI quickly.
+4. Expose compatibility configuration in UI for easy operator verification.
+5. Preserve buildability and validation confidence after compatibility additions.
+
 ## Checklist Status
 
 ### Phase 1
@@ -88,9 +95,17 @@
 - [x] UI tone maintained as calm, modern, intuitive, and elderly-friendly
 - [x] Validation rerun after Phase 5 UI implementation (`npm run lint`, `npm run build`)
 
+### Phase 6
+- [x] OpenClaw compatibility layer added (`src/lib/openclaw-compat.ts`) with gateway/API/auth/base URL normalization
+- [x] Integration and rollback documentation added (`docs/OPENCLAW_COMPATIBILITY.md`)
+- [x] Environment defaults updated for drop-in mode (`.env.example`)
+- [x] Connections surface now shows compatibility snapshot from runtime config
+- [x] README updated with Phase 6 compatibility guidance and pointers
+- [x] Validation rerun after Phase 6 additions (`npm run lint`, `npm run build`)
+
 ## Current State
 
-The repository now contains working product surfaces for Home, Chat, Skills, Jobs, Outputs, Connections, and Settings/Advanced status views:
+The repository now contains working product surfaces for Home, Chat, Skills, Jobs, Outputs, Connections, Settings/Advanced status views, plus Phase 6 compatibility scaffolding for OpenClaw drop-in UI replacement:
 
 - **Home (Phases 2 + 4):** Day-start dashboard with morning brief, status pulse, active jobs, pinned outputs, quick actions, and a simple customization surface for widget visibility/order.
 - **Chat (Phase 5):** Session-oriented conversation workspace with readable message layout, clear activity states, and simple composer behavior.
@@ -99,8 +114,10 @@ The repository now contains working product surfaces for Home, Chat, Skills, Job
 - **Outputs (Phase 4):** Full feed/detail pattern with pin/save controls and state-connected Home pin behavior.
 - **Connections (Phase 5):** Guided auth/connect workflow with clear health states, step-by-step setup guidance, and plain-language action outcomes.
 - **Status & history (Phase 5):** Glanceable health snapshot, friendly activity timeline, and concise log digest in Advanced Settings.
+- **Compatibility (Phase 6):** Dedicated OpenClaw compatibility layer (`src/lib/openclaw-compat.ts`) defines gateway/API/auth/base URL assumptions and supports drop-in vs standalone UI mode.
+- **Integration docs (Phase 6):** `docs/OPENCLAW_COMPATIBILITY.md` documents wiring map, switch-over steps, and rollback to stock UI.
 - **Design posture:** Surfaces use calm spacing, high-contrast typography, plain language, and larger touch targets to remain intuitive and elderly-friendly.
 - **State model:** Shared client state provider keeps outputs and Home customization aligned, while Phase 5 surfaces use focused local interaction state for clarity.
-- **Buildability:** Lint and production build pass after Phase 5 implementation.
+- **Buildability:** Lint and production build pass after Phase 6 compatibility implementation.
 
-Phase 1, Phase 2, Phase 3, Phase 4, and Phase 5 are complete and validated.
+Phase 1, Phase 2, Phase 3, Phase 4, Phase 5, and Phase 6 are complete and validated.
