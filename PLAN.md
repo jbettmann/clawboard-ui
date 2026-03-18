@@ -109,11 +109,11 @@
 - [x] Validation run (`npm run lint`, `npm run build`)
 
 ### Phase 7
-- [ ] Real runtime health/status replaces env-only views
-- [ ] Gateway/node/auth/connectivity states surfaced clearly
-- [ ] Status/history views simplified and made actionable
-- [ ] Troubleshooting UX improved with clear next steps
-- [ ] Validation run (`npm run lint`, `npm run build`)
+- [x] Real runtime health/status replaces env-only views
+- [x] Gateway/node/auth/connectivity states surfaced clearly
+- [x] Status/history views simplified and made actionable
+- [x] Troubleshooting UX improved with clear next steps
+- [x] Validation run (`npm run lint`, `npm run build`)
 
 ### Phase 8
 - [ ] Responsive behavior refined across common screen sizes
@@ -126,12 +126,13 @@
 
 ## Current State
 
-The repository has now been re-audited for the Phase 1–6 reset and patched to close the most important gaps that were still preventing those phases from being truly complete:
+The repository has now been re-audited for the full Phase 1–7 reset block and patched to close the most important gaps that were still preventing those phases from being truly complete:
 
 - The shell remains full-width, theme-aware, and sidebar-led, with the shared foundation from Phases 1–2 intact.
 - Home remains redesigned around live context, attention, and next actions.
-- Additional reset cleanup work has removed remaining fake/demo read-path behavior by wiring outputs, briefs, chat history, and chat send behavior more directly to live OpenClaw reads.
-- The app still needs the later planned observability and polish work in Phases 7–8, but the reset cleanup PR is focused on making Phases 1–6 honestly match their stated delivery.
+- Additional reset cleanup work removed remaining fake/demo read-path behavior by wiring outputs, briefs, chat history, and chat send behavior more directly to live OpenClaw reads.
+- Phase 7 observability has now been completed with live runtime health in Settings, clearer connection guidance, and a more actionable status/history flow.
+- The remaining planned work is the final polish pass in Phase 8.
 
 ### Done
 - New multi-phase redesign + live-data migration plan approved.
@@ -150,11 +151,12 @@ The repository has now been re-audited for the Phase 1–6 reset and patched to 
 - Validation completed for Phase 5 with successful `npm run lint` and `npm run build`.
 - Phase 6 outputs/briefs/chat work completed with real daily brief coverage, clearer agent-output distinctions, and live chat send/history integration.
 - Validation completed for Phase 6 with successful `npm run lint` and `npm run build`.
-- Reset audit for Phases 1–6 completed and cleanup changes applied to close the missing implementation gaps discovered during the audit.
-- Reset cleanup validation for Phases 1–6 completed with successful `npm run lint` and `npm run build`.
+- Reset audit for Phases 1–7 completed and cleanup changes applied to close the missing implementation gaps discovered during the audit.
+- Runtime health was added to Settings, output pin/save state now seeds from live metadata and persists across refreshes, and the connections/status surfaces were rewritten to be more actionable.
+- Reset cleanup validation for Phases 1–7 completed with successful `npm run lint` and `npm run build`.
 
 ### Now
-- The Phase 1–6 reset cleanup block is ready to be merged after conflict resolution.
+- The Phase 1–7 reset cleanup block is ready for review and merge.
 
 ### Next
-- After the Phase 1–6 reset cleanup PR is merged, re-read `PLAN.md` and begin Phase 7.
+- After the Phase 1–7 reset cleanup PR is merged, re-read `PLAN.md` and begin Phase 8.

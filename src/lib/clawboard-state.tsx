@@ -42,6 +42,7 @@ function loadStoredState() {
     return {
       selectedOutputId: null,
       widgetPreferences: DEFAULT_WIDGET_PREFERENCES,
+      outputPreferences: {} as Record<string, { pinned?: boolean; saved?: boolean }>,
     };
   }
 
@@ -51,22 +52,26 @@ function loadStoredState() {
       return {
         selectedOutputId: null,
         widgetPreferences: DEFAULT_WIDGET_PREFERENCES,
+        outputPreferences: {} as Record<string, { pinned?: boolean; saved?: boolean }>,
       };
     }
 
     const parsed = JSON.parse(raw) as {
       selectedOutputId?: string;
       widgetPreferences?: HomeWidgetPreference[];
+      outputPreferences?: Record<string, { pinned?: boolean; saved?: boolean }>;
     };
 
     const widgetPreferences = parsed.widgetPreferences?.length ? parsed.widgetPreferences : DEFAULT_WIDGET_PREFERENCES;
     const selectedOutputId = parsed.selectedOutputId ?? null;
+    const outputPreferences = parsed.outputPreferences ?? {};
 
-    return { selectedOutputId, widgetPreferences };
+    return { selectedOutputId, widgetPreferences, outputPreferences };
   } catch {
     return {
       selectedOutputId: null,
       widgetPreferences: DEFAULT_WIDGET_PREFERENCES,
+      outputPreferences: {} as Record<string, { pinned?: boolean; saved?: boolean }>,
     };
   }
 }
@@ -76,6 +81,9 @@ export function ClawboardStateProvider({ children }: { children: React.ReactNode
   const [outputs, setOutputs] = useState<OutputItem[]>([]);
   const [selectedOutputId, setSelectedOutputId] = useState<string | null>(storedState.selectedOutputId);
   const [widgetPreferences, setWidgetPreferences] = useState<HomeWidgetPreference[]>(storedState.widgetPreferences);
+  const [outputPreferences, setOutputPreferences] = useState<Record<string, { pinned?: boolean; saved?: boolean }>>(
+    storedState.outputPreferences,
+  );
   const [outputsLoading, setOutputsLoading] = useState(true);
   const [outputsError, setOutputsError] = useState<string | null>(null);
   const [reloadToken, setReloadToken] = useState(0);
@@ -98,10 +106,11 @@ export function ClawboardStateProvider({ children }: { children: React.ReactNode
           const previousMap = new Map(prevOutputs.map((output) => [output.id, output]));
           const sanitized = items.map((item) => {
             const previous = previousMap.get(item.id);
+            const stored = outputPreferences[item.id];
             return {
               ...item,
-              pinned: previous?.pinned ?? item.pinned ?? false,
-              saved: previous?.saved ?? item.saved ?? false,
+              pinned: stored?.pinned ?? previous?.pinned ?? item.pinned ?? false,
+              saved: stored?.saved ?? previous?.saved ?? item.saved ?? false,
             };
           });
 
@@ -130,7 +139,7 @@ export function ClawboardStateProvider({ children }: { children: React.ReactNode
       canceled = true;
       clearTimeout(timer);
     };
-  }, [reloadToken]);
+  }, [outputPreferences, reloadToken]);
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -140,19 +149,45 @@ export function ClawboardStateProvider({ children }: { children: React.ReactNode
     try {
       window.localStorage.setItem(
         STORAGE_KEY,
-        JSON.stringify({ selectedOutputId, widgetPreferences }),
+        JSON.stringify({ selectedOutputId, widgetPreferences, outputPreferences }),
       );
     } catch {
       // Ignore storage write failures.
     }
-  }, [selectedOutputId, widgetPreferences]);
+  }, [selectedOutputId, widgetPreferences, outputPreferences]);
 
   function toggleOutputPinned(id: string) {
-    setOutputs((prev) => prev.map((output) => (output.id === id ? { ...output, pinned: !output.pinned } : output)));
+    setOutputs((prev) => {
+      const next = prev.map((output) => (output.id === id ? { ...output, pinned: !output.pinned } : output));
+      const updated = next.find((output) => output.id === id);
+      if (updated) {
+        setOutputPreferences((existing) => ({
+          ...existing,
+          [id]: {
+            ...(existing[id] ?? {}),
+            pinned: updated.pinned,
+          },
+        }));
+      }
+      return next;
+    });
   }
 
   function toggleOutputSaved(id: string) {
-    setOutputs((prev) => prev.map((output) => (output.id === id ? { ...output, saved: !output.saved } : output)));
+    setOutputs((prev) => {
+      const next = prev.map((output) => (output.id === id ? { ...output, saved: !output.saved } : output));
+      const updated = next.find((output) => output.id === id);
+      if (updated) {
+        setOutputPreferences((existing) => ({
+          ...existing,
+          [id]: {
+            ...(existing[id] ?? {}),
+            saved: updated.saved,
+          },
+        }));
+      }
+      return next;
+    });
   }
 
   function moveWidget(id: HomeWidgetId, direction: "up" | "down") {

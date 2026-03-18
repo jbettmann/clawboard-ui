@@ -4,6 +4,7 @@ import type {
   OpenClawChatMessageRole,
   OpenClawChatSession,
   OpenClawChatSessionStatus,
+  OpenClawConnectionHealth,
   OpenClawDailyBrief,
   OpenClawJobHistoryEntry,
   OpenClawOutput,
@@ -133,6 +134,7 @@ const ENDPOINTS = {
   chatMessages: process.env.NEXT_PUBLIC_OPENCLAW_ENDPOINT_CHAT_MESSAGES ?? "/chat/sessions/{sessionId}/messages",
   statusSnapshot: process.env.NEXT_PUBLIC_OPENCLAW_ENDPOINT_STATUS_SNAPSHOT ?? "/status/snapshot",
   statusTimeline: process.env.NEXT_PUBLIC_OPENCLAW_ENDPOINT_STATUS_TIMELINE ?? "/status/timeline",
+  statusHealth: process.env.NEXT_PUBLIC_OPENCLAW_ENDPOINT_STATUS_HEALTH ?? "/status/health",
   jobHistory: process.env.NEXT_PUBLIC_OPENCLAW_ENDPOINT_JOB_HISTORY ?? "/jobs/history",
   dailyBriefs: process.env.NEXT_PUBLIC_OPENCLAW_ENDPOINT_DAILY_BRIEFS ?? "/daily-briefs",
   toolsInvoke: process.env.NEXT_PUBLIC_OPENCLAW_ENDPOINT_TOOLS_INVOKE ?? "/tools/invoke",
@@ -437,8 +439,8 @@ export function fetchOutputs() {
   return openClawFetch<OpenClawOutput[]>(ENDPOINTS.outputs).then((items) =>
     items.map((item) => ({
       ...item,
-      pinned: false,
-      saved: false,
+      pinned: Boolean(item.metadata?.pinned),
+      saved: Boolean(item.metadata?.saved),
     })),
   );
 }
@@ -470,6 +472,10 @@ export function fetchStatusSnapshot() {
 
 export function fetchStatusTimeline() {
   return openClawFetch<StatusTimelineEvent[]>(ENDPOINTS.statusTimeline);
+}
+
+export function fetchConnectionHealth() {
+  return openClawFetch<OpenClawConnectionHealth>(ENDPOINTS.statusHealth);
 }
 
 export function fetchJobHistory(jobId?: string) {

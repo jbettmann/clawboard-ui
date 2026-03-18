@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Archive, CheckCircle2, CircleAlert, Clock3, History, Timer } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -17,12 +18,8 @@ import {
 import { useOpenClawResource } from "@/hooks/use-openclaw-resource";
 
 function toneTextClass(tone: StatusTone) {
-  if (tone === "good") {
-    return "text-emerald-700 dark:text-emerald-300";
-  }
-  if (tone === "watch") {
-    return "text-amber-700 dark:text-amber-300";
-  }
+  if (tone === "good") return "text-emerald-700 dark:text-emerald-300";
+  if (tone === "watch") return "text-amber-700 dark:text-amber-300";
   return "text-zinc-800 dark:text-zinc-100";
 }
 
@@ -34,6 +31,25 @@ function toneIcon(tone: StatusTone) {
     return <CircleAlert className="size-4 text-amber-500" />;
   }
   return <Timer className="size-4 text-zinc-500" />;
+}
+
+type FocusSignal = {
+  id: string;
+  label: string;
+  summary: string;
+  detail: string;
+};
+
+function toneLabel(tone: StatusTone) {
+  if (tone === "good") return "Stable";
+  if (tone === "watch") return "Watch";
+  return "Info";
+}
+
+function toneAction(tone: StatusTone) {
+  if (tone === "good") return "Stable – keep an eye on it.";
+  if (tone === "watch") return "Check the related connection or auth state.";
+  return "Informational note – monitor for changes.";
 }
 
 export function StatusHistory() {
@@ -53,18 +69,53 @@ export function StatusHistory() {
   const snapshot = snapshotData ?? [];
   const timeline = timelineData ?? [];
 
-  const supportingBadges = snapshot.slice(0, 3).map((item) => (
+  const focusSignals: FocusSignal[] = (() => {
+    const snapshotSignals = snapshot
+      .filter((item) => item.tone !== "good")
+      .map((item) => ({
+        id: item.label,
+        label: item.label,
+        summary: toneLabel(item.tone),
+        detail: item.value,
+      }));
+
+    const timelineSignals = timeline
+      .filter((event) => event.tone !== "good")
+      .map((event) => ({
+        id: `${event.time}-${event.title}`,
+        label: event.title,
+        summary: `${toneLabel(event.tone)} • ${event.time}`,
+        detail: event.detail,
+      }));
+
+    return [...snapshotSignals, ...timelineSignals].slice(0, 3);
+  })();
+
+  const snapshotBadges = snapshot.slice(0, 3).map((item) => (
     <Badge key={item.label} variant="muted">
-      {item.value}
+      {item.label}: {item.value}
     </Badge>
   ));
-  if (!supportingBadges.length) {
-    supportingBadges.push(
-      <Badge key="placeholder" variant="muted">
-        {snapshotStatus === "loading" ? "Refreshing" : "Awaiting data"}
-      </Badge>,
-    );
-  }
+
+  const baseBadges =
+    snapshotBadges.length > 0
+      ? snapshotBadges
+      : [
+          <Badge key="placeholder" variant="muted">
+            {snapshotStatus === "loading" ? "Refreshing" : "Awaiting data"}
+          </Badge>,
+        ];
+
+  const supportingBadges = [
+    ...(focusSignals.length
+      ? [
+          <Badge key="focus" variant="muted">
+            {focusSignals.length} attention item{focusSignals.length > 1 ? "s" : ""}
+          </Badge>,
+        ]
+      : []),
+    ...baseBadges,
+  ];
 
   const refreshAll = () => {
     refreshSnapshot();
@@ -79,7 +130,7 @@ export function StatusHistory() {
       return (
         <ErrorState
           title="Unable to load snapshot"
-          description={snapshotError ?? "Try refreshing to reconnect to OpenClaw."}
+          description={snapshotError ?? "Check connectivity and refresh to reconnect to OpenClaw."}
           action={
             <Button variant="ghost" onClick={refreshSnapshot}>
               Retry
@@ -91,8 +142,8 @@ export function StatusHistory() {
     if (!snapshot.length) {
       return (
         <EmptyState
-          title="No status snapshot"
-          description="OpenClaw has not reported any high-level signals yet."
+          title="Snapshot warming up"
+          description="OpenClaw is still sharing health data; it will appear here shortly."
           action={
             <Button variant="ghost" onClick={refreshSnapshot}>
               Refresh
@@ -124,7 +175,7 @@ export function StatusHistory() {
       return (
         <ErrorState
           title="Unable to load events"
-          description={timelineError ?? "Try refreshing to get the latest activity."}
+          description={timelineError ?? "Check your connection and refresh to load recent activity."}
           action={
             <Button variant="ghost" onClick={refreshTimeline}>
               Retry
@@ -136,8 +187,8 @@ export function StatusHistory() {
     if (!timeline.length) {
       return (
         <EmptyState
-          title="No activity yet"
-          description="OpenClaw has not reported timeline events."
+          title="Activity coming soon"
+          description="Events will appear here once OpenClaw reports them."
           action={
             <Button variant="ghost" onClick={refreshTimeline}>
               Refresh
@@ -162,7 +213,9 @@ export function StatusHistory() {
               {toneIcon(event.tone)}
               {event.title}
             </p>
+            <p className="text-xs uppercase tracking-[0.3em] text-zinc-500 dark:text-zinc-400">{toneLabel(event.tone)}</p>
             <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{event.detail}</p>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400">{toneAction(event.tone)}</p>
           </div>
         ))}
       </div>
@@ -175,7 +228,7 @@ export function StatusHistory() {
     <div className="space-y-5 pb-6">
       <PageHeader
         title="Status & history"
-        context="Live health snapshots, activity timeline, and digestible context from OpenClaw."
+        context="Live health snapshots, calm activity timeline, and digestible context from OpenClaw."
         supportingStatus={<>{supportingBadges}</>}
         primaryAction={
           <Button onClick={refreshAll} size="lg" variant="secondary">
@@ -186,6 +239,39 @@ export function StatusHistory() {
 
       <div>{snapshotContent}</div>
 
+      <Card>
+        <CardHeader>
+          <CardTitle>Action focus</CardTitle>
+          <CardDescription>Signals worth a calm glance right now.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {focusSignals.length ? (
+            focusSignals.map((signal) => (
+              <div
+                key={signal.id}
+                className="rounded-xl border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-800 dark:bg-zinc-900"
+              >
+                <p className="text-sm font-semibold text-[var(--color-text-strong)]">{signal.label}</p>
+                <p className="text-xs uppercase tracking-[0.3em] text-zinc-500 dark:text-zinc-400">{signal.summary}</p>
+                <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{signal.detail}</p>
+              </div>
+            ))
+          ) : (
+            <p className="rounded-xl border border-dashed border-zinc-300 bg-zinc-50 px-4 py-3 text-sm text-zinc-600 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400">
+              All systems look steady. Keep watching the timeline for new activity.
+            </p>
+          )}
+          <div className="flex flex-wrap gap-2 pt-2">
+            <Button asChild size="sm" variant="ghost">
+              <Link href="/connections">Connections center</Link>
+            </Button>
+            <Button asChild size="sm" variant="ghost">
+              <Link href="/settings/advanced">Status & history</Link>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="grid gap-5 xl:grid-cols-[1.2fr_1fr]">
         <Card>
           <CardHeader>
@@ -193,7 +279,7 @@ export function StatusHistory() {
               <History className="size-4 text-zinc-500" />
               Activity timeline
             </CardTitle>
-            <CardDescription>Recent events translated into calm language.</CardDescription>
+            <CardDescription>Recent events told simply so you can plan the next steps.</CardDescription>
           </CardHeader>
           <CardContent>{timelineContent}</CardContent>
         </Card>
@@ -204,7 +290,7 @@ export function StatusHistory() {
               <Archive className="size-4 text-zinc-500" />
               Log digest
             </CardTitle>
-            <CardDescription>Short summaries you can scan quickly.</CardDescription>
+            <CardDescription>Concise reminders that keep the signal clear.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             {digestLines.length ? (
@@ -222,7 +308,7 @@ export function StatusHistory() {
               </p>
             )}
             <p className="rounded-xl border border-dashed border-zinc-300 bg-zinc-50 px-4 py-3 text-sm text-zinc-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300">
-              This view keeps useful trends visible without exposing debug noise.
+              This digest keeps meaningful trends visible without amplifying noise.
             </p>
           </CardContent>
         </Card>
