@@ -294,6 +294,8 @@ export function HomeDashboard() {
                   onClick={() => toggleWidgetVisibility(widget.id)}
                   variant={widget.visible ? "default" : "secondary"}
                   className="h-10 min-w-24"
+                  aria-pressed={widget.visible}
+                  aria-label={`${widget.visible ? "Hide" : "Show"} ${widget.label}`}
                 >
                   {widget.visible ? "Shown" : "Hidden"}
                 </Button>

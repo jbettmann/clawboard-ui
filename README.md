@@ -1,6 +1,6 @@
 # Clawboard UI
 
-Phase 1–7 frontend foundation for Clawboard.
+Phase 1–8 frontend foundation for Clawboard.
 
 ## Stack
 
@@ -95,6 +95,14 @@ npm run start  # run production build
 - One-command local container startup (`docker-compose.yml`)
 - Standalone Next.js build output enabled (`next.config.ts`)
 - Non-technical setup guide added (`docs/INSTALL_SETUP.md`)
+
+## Accessibility & OSS Polish (Phase 8)
+
+- Skip link and improved keyboard focus behavior added in the app shell
+- Selected-card controls now expose pressed state via `aria-pressed`
+- Save/action status lines now announce updates with `aria-live`
+- Contributor templates added in `.github/ISSUE_TEMPLATE/*` and `.github/pull_request_template.md`
+- Demo/screenshot guidance and asset folders added in `docs/DEMO_ASSETS.md` and `docs/assets/*`
 
 ## UI Foundation Notes
 

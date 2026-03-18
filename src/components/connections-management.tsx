@@ -206,6 +206,8 @@ export function ConnectionsManagement() {
                 key={item.id}
                 type="button"
                 onClick={() => setSelectedId(item.id)}
+                aria-pressed={selected.id === item.id}
+                aria-label={`Select connection ${item.name}`}
                 className={`rounded-xl border p-4 text-left transition-colors ${
                   selected.id === item.id
                     ? "border-zinc-900 bg-zinc-900 text-zinc-50 dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900"
@@ -265,7 +267,9 @@ export function ConnectionsManagement() {
               </Button>
             </div>
 
-            <p className="text-sm text-zinc-500 dark:text-zinc-400">{statusNote}</p>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400" aria-live="polite">
+              {statusNote}
+            </p>
           </CardContent>
         </Card>
 

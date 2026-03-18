@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Clawboard UI",
-  description: "Phase 1 UI foundation for Clawboard.",
+  description: "Accessible, calm OpenClaw companion UI with drop-in compatibility.",
 };
 
 export default function RootLayout({

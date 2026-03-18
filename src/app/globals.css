@@ -29,3 +29,32 @@ body {
   color: var(--foreground);
   font-family: var(--font-geist-sans), Inter, system-ui, -apple-system, sans-serif;
 }
+
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -4rem;
+  z-index: 50;
+  border-radius: 0.75rem;
+  background: rgb(24 24 27);
+  color: white;
+  padding: 0.65rem 0.9rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: top 160ms ease;
+}
+
+.skip-link:focus {
+  top: 1rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,4 +1,4 @@
-# Clawboard UI – Product Plan (Phases 1–7)
+# Clawboard UI – Product Plan (Phases 1–8)
 
 ## Approved Plan
 
@@ -57,6 +57,13 @@
 3. Make development vs production run paths explicit and easy to follow.
 4. Clarify environment setup and where users should edit configuration.
 5. Preserve buildability and validation confidence after packaging/docs updates.
+
+### Phase 8 — Final Polish, Accessibility, and OSS Readiness
+1. Improve practical accessibility support (keyboard flow, focus cues, semantic state announcements).
+2. Apply final interaction polish across key product surfaces without changing core behavior.
+3. Add screenshot/demo asset structure and guidance for docs/PR usage.
+4. Add contributor-facing templates (issues/PR) for open-source collaboration readiness.
+5. Preserve buildability and validation confidence after final polish updates.
 
 ## Checklist Status
 
@@ -118,9 +125,17 @@
 - [x] Next.js standalone output enabled for lean runtime packaging (`next.config.ts`)
 - [x] Validation rerun after Phase 7 updates (`npm run lint`, `npm run build`)
 
+### Phase 8
+- [x] App shell accessibility polish added (skip link, stronger keyboard focus, `aria-current` on active nav)
+- [x] Selection controls improved with practical semantics (`aria-pressed` + descriptive labels)
+- [x] Dynamic status notes made screen-reader-friendly (`aria-live` announcements)
+- [x] Demo/screenshot asset structure and usage guidance added (`docs/DEMO_ASSETS.md`, `docs/assets/*`)
+- [x] OSS contribution templates added (`.github/ISSUE_TEMPLATE/*`, `.github/pull_request_template.md`)
+- [x] Validation rerun after Phase 8 updates (`npm run lint`, `npm run build`)
+
 ## Current State
 
-The repository now contains working product surfaces for Home, Chat, Skills, Jobs, Outputs, Connections, Settings/Advanced status views, plus Phase 6 compatibility scaffolding and Phase 7 packaging/install improvements for OpenClaw drop-in UI replacement:
+The repository now contains working product surfaces for Home, Chat, Skills, Jobs, Outputs, Connections, Settings/Advanced status views, plus Phase 6 compatibility scaffolding, Phase 7 packaging/install improvements, and Phase 8 accessibility/OSS polish for OpenClaw drop-in UI replacement:
 
 - **Home (Phases 2 + 4):** Day-start dashboard with morning brief, status pulse, active jobs, pinned outputs, quick actions, and a simple customization surface for widget visibility/order.
 - **Chat (Phase 5):** Session-oriented conversation workspace with readable message layout, clear activity states, and simple composer behavior.
@@ -134,8 +149,11 @@ The repository now contains working product surfaces for Home, Chat, Skills, Job
 - **Packaging (Phase 7):** Multi-stage container packaging added via `Dockerfile` and `.dockerignore`, with Next.js standalone output for lean runtime startup.
 - **Installability (Phase 7):** One-command Docker startup path documented and configured in `docker-compose.yml`.
 - **Operator docs (Phase 7):** `docs/INSTALL_SETUP.md` provides plain-language setup and troubleshooting for non-technical users.
+- **Accessibility polish (Phase 8):** App shell now includes a skip link, keyboard-focused nav enhancements, and active-page semantics (`aria-current`) for stronger keyboard/screen-reader flow.
+- **Interaction semantics (Phase 8):** Selectable cards across key surfaces now expose pressed state and clearer labels, and dynamic status messages use `aria-live` to announce updates.
+- **OSS readiness (Phase 8):** Contributor templates and demo/screenshot guidance were added via `.github/*` templates and `docs/DEMO_ASSETS.md` with `docs/assets/` structure.
 - **Design posture:** Surfaces use calm spacing, high-contrast typography, plain language, and larger touch targets to remain intuitive and elderly-friendly.
 - **State model:** Shared client state provider keeps outputs and Home customization aligned, while Phase 5 surfaces use focused local interaction state for clarity.
 - **Buildability:** Lint and production build pass after Phase 7 packaging/install updates.
 
-Phase 1, Phase 2, Phase 3, Phase 4, Phase 5, Phase 6, and Phase 7 are complete and validated.
+Phase 1, Phase 2, Phase 3, Phase 4, Phase 5, Phase 6, Phase 7, and Phase 8 are complete and validated.

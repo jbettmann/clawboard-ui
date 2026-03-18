@@ -141,6 +141,8 @@ export function JobsManagement() {
                 key={job.id}
                 type="button"
                 onClick={() => selectJob(job.id)}
+                aria-pressed={selectedId === job.id}
+                aria-label={`Edit job ${job.name}`}
                 className={`w-full rounded-xl border p-3 text-left transition-colors ${
                   selectedId === job.id
                     ? "border-zinc-900 bg-zinc-900 text-zinc-50 dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900"
@@ -237,7 +239,9 @@ export function JobsManagement() {
                 <RefreshCcw className="size-4" />
                 Save changes
               </Button>
-              <p className="text-sm text-zinc-500 dark:text-zinc-400">{activityNote}</p>
+              <p className="text-sm text-zinc-500 dark:text-zinc-400" aria-live="polite">
+                {activityNote}
+              </p>
             </div>
           </CardContent>
         </Card>
