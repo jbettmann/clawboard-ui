@@ -80,12 +80,12 @@
 - [x] Validation run (`npm run lint`, `npm run build`)
 
 ### Phase 3
-- [ ] Shared OpenClaw API client added
-- [ ] Typed live-data domain models added
-- [ ] Shared loading / error / empty-state primitives added
-- [ ] Mock read-path data removed from all screens
-- [ ] Read-only live data wired across dashboard surfaces
-- [ ] Validation run (`npm run lint`, `npm run build`)
+- [x] Shared OpenClaw API client added
+- [x] Typed live-data domain models added
+- [x] Shared loading / error / empty-state primitives added
+- [x] Mock read-path data removed from all screens
+- [x] Read-only live data wired across dashboard surfaces
+- [x] Validation run (`npm run lint`, `npm run build`)
 
 ### Phase 4
 - [ ] Home redesigned around real user context and next actions
@@ -126,14 +126,13 @@
 
 ## Current State
 
-The existing repository now has a refreshed Next.js/Tailwind dashboard shell with a semantic token foundation, explicit theme controls, and a sidebar-led navigation system. However, the current app is still a demo-state frontend:
+The existing repository now has a refreshed Next.js/Tailwind dashboard shell with a semantic token foundation, explicit theme controls, a shadcn-style sidebar-led navigation system, and a first-pass live OpenClaw data layer. The app is no longer purely demo-state, but additional product redesign and deeper live-data coverage are still needed:
 
 - The shell now uses the full viewport more effectively and supports light/dark/system theme preferences.
-- The primary navigation is now sidebar-driven, but the product surfaces still rely on mock/local state rather than live OpenClaw data.
-- Shared page headers now provide more consistent title/context/action structure across the dashboard.
-- Most screens still use local component state and fixture data rather than live OpenClaw data.
-- No real read-path API integration exists yet for skills, jobs, history, outputs, briefs, sessions, or connection health.
-- Existing surfaces are stronger structurally, but they still need the real-data migration and later product redesign phases to meet the full brief.
+- The primary navigation is sidebar-driven and shared page headers provide more consistent title/context/action structure across the dashboard.
+- A shared OpenClaw client, typed domain models, async resource utilities, and read-only live data hooks are now in place.
+- Core dashboard surfaces now use read-only live wiring with loading, error, and empty states instead of mock read-path content.
+- Later phases still need richer real-data coverage (history/brief distinctions/session depth), product-level redesign, and safe write-path integrations where supported.
 
 ### Done
 - New multi-phase redesign + live-data migration plan approved.
@@ -142,9 +141,11 @@ The existing repository now has a refreshed Next.js/Tailwind dashboard shell wit
 - Validation completed for Phase 1 with successful `npm run lint` and `npm run build`.
 - Phase 2 navigation overhaul completed with a sidebar-driven shell, mobile/desktop navigation states, and a shared page header framework.
 - Validation completed for Phase 2 with successful `npm run lint` and `npm run build`.
+- Phase 3 real-data foundation completed with a shared OpenClaw client, typed domain models, async data primitives, and read-only live wiring across dashboard surfaces.
+- Validation completed for Phase 3 with successful `npm run lint` and `npm run build`.
 
 ### Now
-- Phase 2 is ready to be committed, pushed, and opened as a PR for review.
+- Phase 3 is ready to be committed, pushed, and opened as a PR for review.
 
 ### Next
-- Wait for approval and merge of the Phase 2 PR, then re-read `PLAN.md` and begin Phase 3 only after merge.
+- Wait for approval and merge of the Phase 3 PR, then re-read `PLAN.md` and begin Phase 4 only after merge.

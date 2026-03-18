@@ -1,62 +1,15 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { CheckCircle2, Circle, Plus, Save, TriangleAlert } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { CheckCircle2, Circle } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageHeader } from "@/components/page-header";
-
-type SkillStatus = "ready" | "needs-review" | "draft";
-
-type Skill = {
-  id: string;
-  name: string;
-  summary: string;
-  triggerHint: string;
-  safetyLevel: "low" | "moderate" | "high";
-  tags: string;
-  status: SkillStatus;
-  enabled: boolean;
-  lastEdited: string;
-};
-
-const initialSkills: Skill[] = [
-  {
-    id: "weather",
-    name: "Weather Brief",
-    summary: "Gives clear daily weather updates in simple language.",
-    triggerHint: "When user asks about weather or forecast",
-    safetyLevel: "low",
-    tags: "weather, forecast, daily",
-    status: "ready",
-    enabled: true,
-    lastEdited: "Today, 07:12",
-  },
-  {
-    id: "node-connect",
-    name: "Node Connect",
-    summary: "Guides device pairing and connection troubleshooting.",
-    triggerHint: "When pairing fails or app cannot connect",
-    safetyLevel: "moderate",
-    tags: "devices, setup, troubleshooting",
-    status: "needs-review",
-    enabled: true,
-    lastEdited: "Yesterday",
-  },
-  {
-    id: "investment-radar",
-    name: "Investment Radar",
-    summary: "Builds morning investment ideas with cited evidence.",
-    triggerHint: "When user asks for stock picks or market radar",
-    safetyLevel: "high",
-    tags: "finance, markets, morning",
-    status: "draft",
-    enabled: false,
-    lastEdited: "2 days ago",
-  },
-];
+import { EmptyState, ErrorState, LoadingState } from "@/components/ui/async-states";
+import { fetchSkills, Skill, SkillStatus } from "@/lib/openclaw-client";
+import { useOpenClawResource } from "@/hooks/use-openclaw-resource";
 
 function statusBadge(status: SkillStatus) {
   if (status === "ready") return <Badge className="bg-[var(--color-state-good)] text-[var(--color-surface-card)]">Ready</Badge>;
@@ -67,80 +20,101 @@ function statusBadge(status: SkillStatus) {
 }
 
 export function SkillsManagement() {
-  const [skills, setSkills] = useState<Skill[]>(initialSkills);
-  const [selectedId, setSelectedId] = useState<string>(initialSkills[0].id);
-  const [formState, setFormState] = useState<Skill>(initialSkills[0]);
-  const [savedAt, setSavedAt] = useState<string>("Not saved yet");
+  const { status, data, error, refresh } = useOpenClawResource<Skill[]>(fetchSkills, []);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const selectedSkill = useMemo(
-    () => skills.find((skill) => skill.id === selectedId) ?? skills[0],
-    [skills, selectedId],
+  const skills = useMemo(() => data ?? [], [data]);
+
+  useEffect(() => {
+    if (status !== "success" || !skills.length) {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setSelectedId((prev) => (prev && skills.some((skill) => skill.id === prev) ? prev : skills[0].id));
+    }, 0);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [status, skills]);
+
+  const selectedSkill = useMemo(() => {
+    if (!skills.length) return null;
+    return skills.find((skill) => skill.id === selectedId) ?? skills[0];
+  }, [skills, selectedId]);
+
+  const header = (
+    <PageHeader
+      title="Skills management"
+      context="Review OpenClaw skills in a read-only snapshot."
+      supportingStatus={
+        <>
+          <Badge variant="muted">{skills.length} skill{skills.length === 1 ? "" : "s"}</Badge>
+          {selectedSkill ? statusBadge(selectedSkill.status) : <Badge variant="muted">{status === "loading" ? "Refreshing" : "No selection"}</Badge>}
+          <Badge variant="muted">Read-only view</Badge>
+        </>
+      }
+      primaryAction={
+        <Button size="lg" variant="secondary" onClick={refresh}>
+          Refresh
+        </Button>
+      }
+    />
   );
 
-  function selectSkill(id: string) {
-    const skill = skills.find((item) => item.id === id);
-    if (!skill) return;
-    setSelectedId(id);
-    setFormState(skill);
+  if (status === "loading") {
+    return (
+      <div className="space-y-5 pb-6">
+        {header}
+        <LoadingState title="Loading skills" description="Pulling live data from OpenClaw…" />
+      </div>
+    );
   }
 
-  function updateField<K extends keyof Skill>(key: K, value: Skill[K]) {
-    setFormState((prev) => ({ ...prev, [key]: value }));
+  if (status === "error") {
+    return (
+      <div className="space-y-5 pb-6">
+        {header}
+        <ErrorState
+          title="Unable to load skills"
+          description={error ?? "Check compatibility settings and try again."}
+          action={
+            <Button variant="ghost" onClick={refresh}>
+              Retry
+            </Button>
+          }
+        />
+      </div>
+    );
   }
 
-  function saveSkill() {
-    setSkills((prev) => prev.map((skill) => (skill.id === formState.id ? { ...formState, lastEdited: "Just now" } : skill)));
-    setSavedAt(`Saved ${new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`);
-  }
-
-  function resetForm() {
-    setFormState(selectedSkill);
-  }
-
-  function addSkill() {
-    const id = `skill-${Date.now()}`;
-    const newSkill: Skill = {
-      id,
-      name: "New skill",
-      summary: "Describe what this skill helps with.",
-      triggerHint: "When user asks for...",
-      safetyLevel: "moderate",
-      tags: "",
-      status: "draft",
-      enabled: false,
-      lastEdited: "Just now",
-    };
-    setSkills((prev) => [newSkill, ...prev]);
-    setSelectedId(id);
-    setFormState(newSkill);
-    setSavedAt("New draft created");
+  if (!skills.length) {
+    return (
+      <div className="space-y-5 pb-6">
+        {header}
+        <EmptyState
+          title="No skills available"
+          description="No skill inventory was returned from OpenClaw."
+          action={
+            <Button variant="ghost" onClick={refresh}>
+              Refresh
+            </Button>
+          }
+        />
+      </div>
+    );
   }
 
   return (
     <div className="space-y-5 pb-6">
-      <PageHeader
-        title="Skills management"
-        context="Review and tweak OpenClaw skills so they stay readable, governed, and ready."
-        supportingStatus={
-          <>
-            <Badge variant="muted">{skills.length} skills</Badge>
-            {statusBadge(selectedSkill.status)}
-            <Badge variant="muted">{savedAt}</Badge>
-          </>
-        }
-        primaryAction={
-          <Button onClick={addSkill} size="lg">
-            <Plus className="size-4" />
-            Add skill
-          </Button>
-        }
-      />
+      {header}
 
       <div className="grid gap-5 lg:grid-cols-[320px_1fr]">
         <Card>
           <CardHeader>
             <CardTitle>Skills list</CardTitle>
-            <CardDescription>Choose a skill to view details and edit settings.</CardDescription>
+            <CardDescription>Choose a skill to view its behavior and governance metadata.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="space-y-2">
@@ -148,9 +122,9 @@ export function SkillsManagement() {
                 <button
                   key={skill.id}
                   type="button"
-                  onClick={() => selectSkill(skill.id)}
+                  onClick={() => setSelectedId(skill.id)}
                   aria-pressed={selectedId === skill.id}
-                  aria-label={`Edit skill ${skill.name}`}
+                  aria-label={`View skill ${skill.name}`}
                   className={`w-full rounded-xl border p-3 text-left transition-colors ${
                     selectedId === skill.id
                       ? "border-zinc-900 bg-zinc-900 text-zinc-50 dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900"
@@ -172,101 +146,51 @@ export function SkillsManagement() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Skill details</CardTitle>
-            <CardDescription>Update behavior, trigger guidance, and safety controls.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
-              <label className="space-y-2">
-                <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Skill name</span>
-                <input
-                  value={formState.name}
-                  onChange={(e) => updateField("name", e.target.value)}
-                  className="h-11 w-full rounded-lg border border-zinc-300 bg-white px-3 text-base outline-none focus:ring-2 focus:ring-zinc-400 dark:border-zinc-700 dark:bg-zinc-950"
-                />
-              </label>
+        {selectedSkill ? (
+          <Card>
+            <CardHeader>
+              <CardTitle>Skill details</CardTitle>
+              <CardDescription>Static metadata, triggers, and governance notes.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="rounded-xl border border-zinc-200/80 bg-zinc-50 p-4 dark:border-zinc-800/80 dark:bg-zinc-900">
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">Skill name</p>
+                  <p className="mt-1 text-lg font-semibold text-zinc-900 dark:text-zinc-100">{selectedSkill.name}</p>
+                </div>
+                <div className="rounded-xl border border-zinc-200/80 bg-zinc-50 p-4 dark:border-zinc-800/80 dark:bg-zinc-900">
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">Safety level</p>
+                  <p className="mt-1 text-lg font-semibold text-zinc-900 dark:text-zinc-100">{selectedSkill.safetyLevel ?? "Unknown"}</p>
+                </div>
+              </div>
 
-              <label className="space-y-2">
-                <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Safety level</span>
-                <select
-                  value={formState.safetyLevel}
-                  onChange={(e) => updateField("safetyLevel", e.target.value as Skill["safetyLevel"])}
-                  className="h-11 w-full rounded-lg border border-zinc-300 bg-white px-3 text-base outline-none focus:ring-2 focus:ring-zinc-400 dark:border-zinc-700 dark:bg-zinc-950"
-                >
-                  <option value="low">Low (general help)</option>
-                  <option value="moderate">Moderate (checks needed)</option>
-                  <option value="high">High (strict controls)</option>
-                </select>
-              </label>
-            </div>
+              <div className="rounded-xl border border-zinc-200/80 bg-white p-4 text-sm text-zinc-700 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300">
+                <p className="text-xs text-zinc-500 dark:text-zinc-400">Summary</p>
+                <p className="mt-1 text-base leading-7 text-zinc-900 dark:text-zinc-100">{selectedSkill.summary}</p>
+              </div>
 
-            <label className="space-y-2">
-              <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">What this skill does</span>
-              <textarea
-                value={formState.summary}
-                onChange={(e) => updateField("summary", e.target.value)}
-                rows={3}
-                className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-base outline-none focus:ring-2 focus:ring-zinc-400 dark:border-zinc-700 dark:bg-zinc-950"
-              />
-            </label>
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="rounded-xl border border-zinc-200/80 bg-white p-4 text-sm text-zinc-700 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300">
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">Trigger hint</p>
+                  <p className="mt-1 text-base text-zinc-900 dark:text-zinc-100">{selectedSkill.triggerHint ?? "—"}</p>
+                </div>
+                <div className="rounded-xl border border-zinc-200/80 bg-white p-4 text-sm text-zinc-700 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300">
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">Tags</p>
+                  <p className="mt-1 text-base text-zinc-900 dark:text-zinc-100">{selectedSkill.tags || "None"}</p>
+                </div>
+              </div>
 
-            <label className="space-y-2">
-              <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Trigger guidance</span>
-              <textarea
-                value={formState.triggerHint}
-                onChange={(e) => updateField("triggerHint", e.target.value)}
-                rows={2}
-                className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-base outline-none focus:ring-2 focus:ring-zinc-400 dark:border-zinc-700 dark:bg-zinc-950"
-              />
-            </label>
-
-            <label className="space-y-2">
-              <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Tags</span>
-              <input
-                value={formState.tags}
-                onChange={(e) => updateField("tags", e.target.value)}
-                className="h-11 w-full rounded-lg border border-zinc-300 bg-white px-3 text-base outline-none focus:ring-2 focus:ring-zinc-400 dark:border-zinc-700 dark:bg-zinc-950"
-                placeholder="weather, daily, reports"
-              />
-            </label>
-
-            <label className="flex items-center justify-between rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900">
-              <span>
-                <p className="text-base font-medium text-zinc-900 dark:text-zinc-100">Skill enabled</p>
-                <p className="text-sm text-zinc-600 dark:text-zinc-400">If turned off, this skill will never auto-run.</p>
-              </span>
-              <input
-                type="checkbox"
-                checked={formState.enabled}
-                onChange={(e) => updateField("enabled", e.target.checked)}
-                className="size-5 rounded border-zinc-300"
-              />
-            </label>
-
-            <div className="rounded-xl border border-[var(--color-accent-border)] bg-[var(--color-accent-muted)] p-4 text-sm text-[var(--color-accent-foreground)]">
-              <p className="flex items-center gap-2 font-medium">
-                <TriangleAlert className="size-4 text-[var(--color-accent-primary)]" />
-                Review tip
-              </p>
-              <p className="mt-1">Use short trigger guidance so routing stays predictable and easy to maintain.</p>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-3">
-              <Button onClick={saveSkill} className="h-11 px-5 text-base">
-                <Save className="size-4" />
-                Save changes
-              </Button>
-              <Button onClick={resetForm} variant="secondary" className="h-11 px-5 text-base">
-                Reset form
-              </Button>
-              <p className="text-sm text-zinc-500 dark:text-zinc-400" aria-live="polite">
-                {savedAt}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+              <div className="flex flex-wrap items-center gap-2">
+                {selectedSkill.enabled ? (
+                  <Badge className="bg-[var(--color-state-good)] text-[var(--color-surface-card)]">Enabled</Badge>
+                ) : (
+                  <Badge variant="muted">Disabled</Badge>
+                )}
+                <Badge variant="muted">Last edited {selectedSkill.lastEdited}</Badge>
+              </div>
+            </CardContent>
+          </Card>
+        ) : null}
       </div>
     </div>
   );
