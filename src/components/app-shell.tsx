@@ -98,7 +98,9 @@ function AppSidebar({ pathname }: { pathname: string }) {
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Navigation</SidebarGroupLabel>
-          <SidebarMenu>{renderedNav}</SidebarMenu>
+          <nav aria-label="Primary navigation">
+            <SidebarMenu>{renderedNav}</SidebarMenu>
+          </nav>
         </SidebarGroup>
       </SidebarContent>
 
@@ -147,7 +149,11 @@ export function AppShell({ pathname, children }: AppShellProps) {
               </div>
             </header>
 
-            <main id="main-content" tabIndex={-1} className="flex-1 px-[var(--page-gutter)] py-[var(--page-gutter)]">
+            <main
+              id="main-content"
+              tabIndex={-1}
+              className="flex-1 min-w-0 w-full px-[var(--page-gutter)] py-[var(--page-gutter)]"
+            >
               <div className="flex min-h-full w-full flex-col gap-[var(--panel-gap)]">{children}</div>
             </main>
           </SidebarInset>

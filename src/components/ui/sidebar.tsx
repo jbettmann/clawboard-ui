@@ -172,41 +172,49 @@ type SidebarMenuButtonProps = React.ComponentProps<"button"> & {
   tooltip?: string;
 };
 
-function SidebarMenuButton({ className, asChild, isActive, tooltip, ...props }: SidebarMenuButtonProps) {
+function SidebarMenuButton({
+  className,
+  asChild = false,
+  isActive,
+  tooltip,
+  children,
+  ...props
+}: SidebarMenuButtonProps) {
   const { open, isMobile } = useSidebar();
-  const Comp = asChild ? React.Fragment : "button";
-  const content = asChild ? (
-    React.Children.only(props.children)
-  ) : (
-    <button
-      data-slot="sidebar-menu-button"
-      className={cn(
-        "flex w-full items-center gap-3 rounded-2xl px-3 py-2 text-sm font-semibold transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]",
-        isActive
-          ? "bg-[var(--color-accent-muted)] text-[var(--color-accent-foreground)]"
-          : "text-[var(--color-text-muted)] hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text-strong)]",
-        className,
-      )}
-      title={!isMobile && !open ? tooltip : undefined}
-      {...props}
-    />
+  const buttonStyles = cn(
+    "flex w-full items-center gap-3 rounded-2xl px-3 py-2 text-sm font-semibold transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]",
+    isActive
+      ? "bg-[var(--color-accent-muted)] text-[var(--color-accent-foreground)]"
+      : "text-[var(--color-text-muted)] hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text-strong)]",
+    className,
   );
+  const title = !isMobile && !open ? tooltip : undefined;
+  const ariaCurrent = isActive ? "page" : undefined;
 
-  if (Comp === React.Fragment) {
-    const child = content as React.ReactElement<{ className?: string; title?: string }>;
+  if (asChild) {
+    const child = React.Children.only(children) as React.ReactElement<{
+      className?: string;
+      title?: string;
+    }>;
     return React.cloneElement(child, {
-      className: cn(
-        "flex w-full items-center gap-3 rounded-2xl px-3 py-2 text-sm font-semibold transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus-ring)]",
-        isActive
-          ? "bg-[var(--color-accent-muted)] text-[var(--color-accent-foreground)]"
-          : "text-[var(--color-text-muted)] hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text-strong)]",
-        child.props.className,
-      ),
-      title: !isMobile && !open ? tooltip : child.props.title,
+      className: cn(buttonStyles, child.props.className),
+      title: title ?? child.props.title,
+      "aria-current": ariaCurrent,
+      ...props,
     });
   }
 
-  return content;
+  return (
+    <button
+      type="button"
+      className={buttonStyles}
+      title={title}
+      aria-current={ariaCurrent}
+      {...props}
+    >
+      {children}
+    </button>
+  );
 }
 
 function SidebarTrigger({ className, ...props }: React.ComponentProps<"button">) {
@@ -252,7 +260,15 @@ function SidebarClose({ className, ...props }: React.ComponentProps<"button">) {
 }
 
 function SidebarInset({ className, ...props }: React.ComponentProps<"div">) {
-  return <div className={cn("flex min-h-screen flex-1 flex-col bg-[var(--color-surface-base)]", className)} {...props} />;
+  return (
+    <div
+      className={cn(
+        "flex min-h-screen flex-1 flex-col bg-[var(--color-surface-base)] min-w-0 w-full",
+        className,
+      )}
+      {...props}
+    />
+  );
 }
 
 export {
