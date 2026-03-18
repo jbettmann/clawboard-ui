@@ -1,10 +1,11 @@
 "use client";
 
-import { Bookmark, BookmarkCheck, Pin, PinOff, ScrollText, Sparkles } from "lucide-react";
+import { Bookmark, BookmarkCheck, Pin, PinOff, Sparkles } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageHeader } from "@/components/page-header";
 import { useClawboardState } from "@/lib/clawboard-state";
 
 export function OutputsManagement() {
@@ -20,18 +21,23 @@ export function OutputsManagement() {
 
   return (
     <div className="space-y-5 pb-6">
-      <Card>
-        <CardHeader>
-          <Badge variant="muted">Phase 4 · Outputs</Badge>
-          <CardTitle className="mt-3 flex items-center gap-2 text-2xl">
-            <ScrollText className="size-5 text-[var(--color-accent-primary)]" />
-            Outputs center
-          </CardTitle>
-          <CardDescription className="text-base">
-            Review finished outputs, open details, and keep the most useful items pinned or saved.
-          </CardDescription>
-        </CardHeader>
-      </Card>
+      <PageHeader
+        title="Outputs center"
+        context="Review finished briefs, pin the useful ones, and keep clean detail views."
+        supportingStatus={
+          <>
+            <Badge variant="muted">{selectedOutput.source}</Badge>
+            {selectedOutput.pinned ? <Badge>Pinned</Badge> : null}
+            {selectedOutput.saved ? <Badge variant="muted">Saved</Badge> : null}
+          </>
+        }
+        primaryAction={
+          <Button onClick={() => toggleOutputPinned(selectedOutput.id)} size="lg">
+            {selectedOutput.pinned ? <PinOff className="size-4" /> : <Pin className="size-4" />}
+            {selectedOutput.pinned ? "Unpin from Home" : "Pin to Home"}
+          </Button>
+        }
+      />
 
       <div className="grid gap-5 lg:grid-cols-[340px_1fr]">
         <Card>

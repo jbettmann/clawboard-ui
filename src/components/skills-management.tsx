@@ -1,11 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { CheckCircle2, Circle, Plus, Save, Sparkles, TriangleAlert } from "lucide-react";
+import { CheckCircle2, Circle, Plus, Save, TriangleAlert } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageHeader } from "@/components/page-header";
 
 type SkillStatus = "ready" | "needs-review" | "draft";
 
@@ -117,18 +118,23 @@ export function SkillsManagement() {
 
   return (
     <div className="space-y-5 pb-6">
-      <Card>
-        <CardHeader>
-          <Badge variant="muted">Phase 3 · Skills</Badge>
-          <CardTitle className="mt-3 flex items-center gap-2 text-2xl">
-            <Sparkles className="size-5 text-[var(--color-accent-primary)]" />
-            Skills management
-          </CardTitle>
-          <CardDescription className="text-base">
-            Review and edit skills in a calm, readable layout with large controls and plain language.
-          </CardDescription>
-        </CardHeader>
-      </Card>
+      <PageHeader
+        title="Skills management"
+        context="Review and tweak OpenClaw skills so they stay readable, governed, and ready."
+        supportingStatus={
+          <>
+            <Badge variant="muted">{skills.length} skills</Badge>
+            {statusBadge(selectedSkill.status)}
+            <Badge variant="muted">{savedAt}</Badge>
+          </>
+        }
+        primaryAction={
+          <Button onClick={addSkill} size="lg">
+            <Plus className="size-4" />
+            Add skill
+          </Button>
+        }
+      />
 
       <div className="grid gap-5 lg:grid-cols-[320px_1fr]">
         <Card>
@@ -137,11 +143,6 @@ export function SkillsManagement() {
             <CardDescription>Choose a skill to view details and edit settings.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            <Button onClick={addSkill} variant="secondary" className="h-11 w-full justify-center text-base">
-              <Plus className="size-4" />
-              Add skill
-            </Button>
-
             <div className="space-y-2">
               {skills.map((skill) => (
                 <button

@@ -1,11 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { BadgeCheck, Cable, CheckCircle2, CircleAlert, HeartPulse, KeyRound, Link2, ShieldCheck, Wifi } from "lucide-react";
+import { BadgeCheck, CheckCircle2, CircleAlert, HeartPulse, KeyRound, Link2, RefreshCcw, ShieldCheck, Wifi } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageHeader } from "@/components/page-header";
 import { getOpenClawCompatibilityConfig, resolveApiBaseUrl } from "@/lib/openclaw-compat";
 
 type ConnectionHealth = "healthy" | "attention" | "offline";
@@ -157,18 +158,23 @@ export function ConnectionsManagement() {
 
   return (
     <div className="space-y-5 pb-6">
-      <Card>
-        <CardHeader>
-          <Badge variant="muted">Phase 5 · Connections</Badge>
-          <CardTitle className="mt-3 flex items-center gap-2 text-2xl">
-            <Cable className="size-5 text-[var(--color-accent-primary)]" />
-            Connections center
-          </CardTitle>
-          <CardDescription className="text-base">
-            Guided connect and auth flow with plain-language health information.
-          </CardDescription>
-        </CardHeader>
-      </Card>
+      <PageHeader
+        title="Connections center"
+        context="Guided visibility into gateway and device health with plain-language next steps."
+        supportingStatus={
+          <>
+            {healthBadge(selected.health)}
+            <Badge variant="muted">{authLabel(selected.auth)}</Badge>
+            <Badge variant="muted">Latency: {selected.latency}</Badge>
+          </>
+        }
+        primaryAction={
+          <Button onClick={runHealthCheck} size="lg">
+            <RefreshCcw className="size-4" />
+            Run health check
+          </Button>
+        }
+      />
 
       <div className="grid gap-5 lg:grid-cols-3">
         <Card>

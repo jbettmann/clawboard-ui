@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { CalendarClock, CirclePause, Play, RefreshCcw, SquarePlay, TimerReset, Wrench } from "lucide-react";
+import { CalendarClock, CirclePause, Play, RefreshCcw, SquarePlay, TimerReset } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageHeader } from "@/components/page-header";
 
 type JobStatus = "running" | "scheduled" | "paused";
 
@@ -116,18 +117,23 @@ export function JobsManagement() {
 
   return (
     <div className="space-y-5 pb-6">
-      <Card>
-        <CardHeader>
-          <Badge variant="muted">Phase 3 · Jobs</Badge>
-          <CardTitle className="mt-3 flex items-center gap-2 text-2xl">
-            <Wrench className="size-5 text-[var(--color-accent-primary)]" />
-            Jobs management
-          </CardTitle>
-          <CardDescription className="text-base">
-            Keep recurring work clear and editable with plain-language schedules and obvious controls.
-          </CardDescription>
-        </CardHeader>
-      </Card>
+      <PageHeader
+        title="Jobs management"
+        context="Clear, plain-language schedules with quick actions for your recurring work."
+        supportingStatus={
+          <>
+            {statusPill(editedJob.status)}
+            <Badge variant="muted">Next: {editedJob.nextRun}</Badge>
+            <Badge variant="muted">Owner: {editedJob.owner}</Badge>
+          </>
+        }
+        primaryAction={
+          <Button onClick={runNow} size="lg">
+            <Play className="size-4" />
+            Run job now
+          </Button>
+        }
+      />
 
       <div className="grid gap-5 lg:grid-cols-[320px_1fr]">
         <Card>

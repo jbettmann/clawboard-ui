@@ -1,7 +1,10 @@
-import { Activity, Archive, CheckCircle2, CircleAlert, Clock3, History, Timer } from "lucide-react";
+import Link from "next/link";
+import { Archive, CheckCircle2, CircleAlert, Clock3, History, Timer } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageHeader } from "@/components/page-header";
 
 const snapshot = [
   { label: "Overall system", value: "Stable", tone: "good" },
@@ -46,18 +49,22 @@ const logDigest = [
 export function StatusHistory() {
   return (
     <div className="space-y-5 pb-6">
-      <Card>
-        <CardHeader>
-          <Badge variant="muted">Phase 5 · Status & History</Badge>
-          <CardTitle className="mt-3 flex items-center gap-2 text-2xl">
-            <Activity className="size-5 text-[var(--color-accent-primary)]" />
-            Status and history
-          </CardTitle>
-          <CardDescription className="text-base">
-            Glanceable health, activity timeline, and plain-language log digest.
-          </CardDescription>
-        </CardHeader>
-      </Card>
+      <PageHeader
+        title="Status & history"
+        context="Live health snapshots, activity timeline, and digestible logs for your workspace."
+        supportingStatus={
+          <>
+            <Badge variant="muted">{snapshot[0].value}</Badge>
+            <Badge variant="muted">{snapshot[1].value}</Badge>
+            <Badge variant="muted">{snapshot[2].value}</Badge>
+          </>
+        }
+        primaryAction={
+          <Button asChild size="lg" variant="secondary">
+            <Link href="/connections">Open connections</Link>
+          </Button>
+        }
+      />
 
       <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
         {snapshot.map((item) => (
