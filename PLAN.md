@@ -126,15 +126,14 @@
 
 ## Current State
 
-The existing repository has a working Next.js/Tailwind UI shell and multiple surface implementations for Home, Chat, Skills, Jobs, Outputs, Connections, and Settings. However, the current app is still a demo-state frontend:
+The existing repository now has a refreshed Next.js/Tailwind dashboard shell with a semantic token foundation, explicit theme controls, and a sidebar-led navigation system. However, the current app is still a demo-state frontend:
 
-- The shell is visually centered and width-constrained rather than using the full viewport effectively.
-- Theme behavior currently follows system preference only; there is no visible toggle or deliberate multi-theme system.
-- The primary navigation is custom and not built with the shadcn sidebar pattern.
-- A sky-blue accent is used heavily instead of the requested `red-400` accent strategy.
-- Most screens use local component state and fixture data rather than live OpenClaw data.
+- The shell now uses the full viewport more effectively and supports light/dark/system theme preferences.
+- The primary navigation is now sidebar-driven, but the product surfaces still rely on mock/local state rather than live OpenClaw data.
+- Shared page headers now provide more consistent title/context/action structure across the dashboard.
+- Most screens still use local component state and fixture data rather than live OpenClaw data.
 - No real read-path API integration exists yet for skills, jobs, history, outputs, briefs, sessions, or connection health.
-- Existing surfaces are useful references for product intent, but they need a substantial redesign and data migration to meet the updated brief.
+- Existing surfaces are stronger structurally, but they still need the real-data migration and later product redesign phases to meet the full brief.
 
 ### Done
 - New multi-phase redesign + live-data migration plan approved.
