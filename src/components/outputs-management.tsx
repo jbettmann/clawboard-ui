@@ -19,6 +19,34 @@ export function OutputsManagement() {
 
   const selectedOutput = outputs.find((item) => item.id === selectedOutputId) ?? outputs[0];
 
+  if (!selectedOutput) {
+    return (
+      <div className="space-y-5 pb-6">
+        <PageHeader
+          title="Outputs center"
+          context="Review finished briefs, pin the useful ones, and keep clean detail views."
+          supportingStatus={<Badge variant="muted">Waiting for live outputs</Badge>}
+          primaryAction={
+            <Button size="lg" variant="secondary" disabled>
+              Waiting for outputs
+            </Button>
+          }
+        />
+        <Card>
+          <CardHeader>
+            <CardTitle>Outputs are loading</CardTitle>
+            <CardDescription>Connect to OpenClaw to see live briefs and digests.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-zinc-600 dark:text-zinc-400">
+              No outputs are available right now. Refresh the page once the gateway is reachable.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-5 pb-6">
       <PageHeader
