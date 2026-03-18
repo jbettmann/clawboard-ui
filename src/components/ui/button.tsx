@@ -16,11 +16,12 @@ const buttonVariants = cva(
         ghost:
           "text-[var(--color-text-muted)] hover:bg-[var(--color-surface-muted)] hover:text-[var(--color-text-strong)]",
       },
-      size: {
-        default: "h-10 px-4 py-2",
-        sm: "h-8 rounded-[calc(var(--radius-md)-0.2rem)] px-3 text-[0.82rem]",
-        lg: "h-11 px-5 text-[0.95rem]",
-      },
+  size: {
+    default: "h-10 px-4 py-2",
+    sm: "h-8 rounded-[calc(var(--radius-md)-0.2rem)] px-3 text-[0.82rem]",
+    lg: "h-11 px-5 text-[0.95rem]",
+    icon: "gap-0 h-10 w-10 rounded-[var(--radius-md)] px-0 text-lg",
+  },
     },
     defaultVariants: {
       variant: "default",
