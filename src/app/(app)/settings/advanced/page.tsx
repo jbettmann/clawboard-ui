@@ -1,10 +1,5 @@
-import { PageTemplate } from "@/components/page-template";
+import { StatusHistory } from "@/components/status-history";
 
 export default function AdvancedSettingsPage() {
-  return (
-    <PageTemplate
-      title="Settings / Advanced"
-      description="Expert-level controls for diagnostics, feature flags, and infrastructure tuning."
-    />
-  );
+  return <StatusHistory />;
 }

@@ -1,10 +1,5 @@
-import { PageTemplate } from "@/components/page-template";
+import { ChatWorkspace } from "@/components/chat-workspace";
 
 export default function ChatPage() {
-  return (
-    <PageTemplate
-      title="Chat"
-      description="Conversation workspace for agent interactions and task orchestration."
-    />
-  );
+  return <ChatWorkspace />;
 }

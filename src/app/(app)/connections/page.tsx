@@ -1,10 +1,5 @@
-import { PageTemplate } from "@/components/page-template";
+import { ConnectionsManagement } from "@/components/connections-management";
 
 export default function ConnectionsPage() {
-  return (
-    <PageTemplate
-      title="Connections"
-      description="Manage nodes, browser relays, and external integrations in one place."
-    />
-  );
+  return <ConnectionsManagement />;
 }

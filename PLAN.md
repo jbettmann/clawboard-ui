@@ -1,4 +1,4 @@
-# Clawboard UI – Product Plan (Phases 1–4)
+# Clawboard UI – Product Plan (Phases 1–5)
 
 ## Approved Plan
 
@@ -36,6 +36,14 @@
 5. Keep interaction model simple, calm, and elderly-friendly.
 6. Preserve buildability and validation confidence after Phase 4 implementation.
 
+### Phase 5 — Chat + Connections + Clear Status
+1. Replace Chat placeholder with a real conversation workspace.
+2. Make session/activity clarity obvious through readable status cues.
+3. Replace Connections placeholder with guided auth/connect flow and understandable health states.
+4. Improve status/log/history presentation in plain language (glanceable, non-debuggy).
+5. Keep design calm, modern, intuitive, and elderly-friendly.
+6. Preserve buildability and validation confidence after Phase 5 implementation.
+
 ## Checklist Status
 
 ### Phase 1
@@ -72,16 +80,27 @@
 - [x] Preferences persist locally for a simple, dependable experience
 - [x] Validation rerun after Phase 4 UI implementation (`npm run lint`, `npm run build`)
 
+### Phase 5
+- [x] Chat route upgraded from placeholder to an interactive conversation workspace
+- [x] Session list and message surface implemented with clear activity/readability cues
+- [x] Connections route upgraded with guided auth/connect flow and plain-language health states
+- [x] Status/log/history presentation implemented in a glanceable non-debuggy Advanced Settings surface
+- [x] UI tone maintained as calm, modern, intuitive, and elderly-friendly
+- [x] Validation rerun after Phase 5 UI implementation (`npm run lint`, `npm run build`)
+
 ## Current State
 
-The repository now contains working product surfaces for Home, Skills, Jobs, and Outputs:
+The repository now contains working product surfaces for Home, Chat, Skills, Jobs, Outputs, Connections, and Settings/Advanced status views:
 
 - **Home (Phases 2 + 4):** Day-start dashboard with morning brief, status pulse, active jobs, pinned outputs, quick actions, and a simple customization surface for widget visibility/order.
+- **Chat (Phase 5):** Session-oriented conversation workspace with readable message layout, clear activity states, and simple composer behavior.
 - **Skills (Phase 3):** Full list/detail/form pattern with editable fields (name, summary, trigger guidance, tags, safety level, enabled state), plus Add, Save, and Reset actions.
 - **Jobs (Phase 3):** Full list/detail management pattern with editable purpose and plain-language schedule input, schedule interpretation hint, and clear controls (Run now, Pause, Resume, Skip next, Save changes).
 - **Outputs (Phase 4):** Full feed/detail pattern with pin/save controls and state-connected Home pin behavior.
+- **Connections (Phase 5):** Guided auth/connect workflow with clear health states, step-by-step setup guidance, and plain-language action outcomes.
+- **Status & history (Phase 5):** Glanceable health snapshot, friendly activity timeline, and concise log digest in Advanced Settings.
 - **Design posture:** Surfaces use calm spacing, high-contrast typography, plain language, and larger touch targets to remain intuitive and elderly-friendly.
-- **State model:** Shared client state provider keeps outputs and Home customization aligned, with local persistence.
-- **Buildability:** Lint and production build pass after Phase 4 implementation.
+- **State model:** Shared client state provider keeps outputs and Home customization aligned, while Phase 5 surfaces use focused local interaction state for clarity.
+- **Buildability:** Lint and production build pass after Phase 5 implementation.
 
-Phase 1, Phase 2, Phase 3, and Phase 4 are complete and validated.
+Phase 1, Phase 2, Phase 3, Phase 4, and Phase 5 are complete and validated.
