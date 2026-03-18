@@ -8,11 +8,11 @@ export default function SettingsPage() {
     <div className="space-y-4">
       <PageTemplate
         title="Settings"
-        description="Configure preferences, access, and behavior defaults for Clawboard UI."
+        description="Configure preferences, comfort defaults, and view activity history in simple language."
       />
 
       <Button asChild variant="secondary">
-        <Link href="/settings/advanced">Go to Advanced Settings</Link>
+        <Link href="/settings/advanced">Open Status & History</Link>
       </Button>
     </div>
   );
