@@ -12,6 +12,8 @@ import { PageHeader } from "@/components/page-header";
 import { fetchConnections, type Connection } from "@/lib/openclaw-client";
 import { getOpenClawCompatibilityConfig, resolveApiBaseUrl } from "@/lib/openclaw-compat";
 import { useOpenClawResource } from "@/hooks/use-openclaw-resource";
+import { InfoTile } from "@/components/ui/info-tile";
+import { StatusTonePanel, statusToneTextClass } from "@/components/ui/status-tone";
 
 function healthBadge(health: Connection["health"]) {
   if (health === "healthy") return <Badge className="bg-[var(--color-state-good)] text-[var(--color-surface-card)]">Healthy</Badge>;
@@ -41,16 +43,6 @@ type ConnectionStep = {
   action: string;
   actionHref?: string;
 };
-
-function focusToneClasses(tone: FocusTone) {
-  if (tone === "good") {
-    return "border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-900/40 dark:bg-emerald-950/20 dark:text-emerald-100";
-  }
-  if (tone === "watch") {
-    return "border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-900/40 dark:bg-amber-950/20 dark:text-amber-100";
-  }
-  return "border-zinc-300 bg-zinc-100 text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100";
-}
 
 function describeFocusState(connection: Connection | null): FocusState | null {
   if (!connection) {
@@ -256,18 +248,18 @@ export function ConnectionsManagement() {
             <CardDescription>Counts refresh live so you can focus on connections that need attention.</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3">
-            <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 dark:border-emerald-900/40 dark:bg-emerald-950/20">
-              <p className="text-xs text-emerald-700 dark:text-emerald-300">Healthy</p>
-              <p className="mt-1 text-2xl font-semibold text-emerald-900 dark:text-emerald-100">{summary.healthy}</p>
-            </div>
-            <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 dark:border-amber-900/40 dark:bg-amber-950/20">
-              <p className="text-xs text-amber-700 dark:text-amber-300">Needs attention</p>
-              <p className="mt-1 text-2xl font-semibold text-amber-900 dark:text-amber-100">{summary.attention}</p>
-            </div>
-            <div className="rounded-xl border border-zinc-300 bg-zinc-100 p-3 dark:border-zinc-700 dark:bg-zinc-900">
-              <p className="text-xs text-zinc-600 dark:text-zinc-300">Offline</p>
-              <p className="mt-1 text-2xl font-semibold text-zinc-900 dark:text-zinc-100">{summary.offline}</p>
-            </div>
+            <StatusTonePanel tone="good" className="p-3">
+              <p className={`text-xs ${statusToneTextClass("good")}`}>Healthy</p>
+              <p className="mt-1 text-2xl font-semibold text-[var(--color-text-strong)]">{summary.healthy}</p>
+            </StatusTonePanel>
+            <StatusTonePanel tone="watch" className="p-3">
+              <p className={`text-xs ${statusToneTextClass("watch")}`}>Needs attention</p>
+              <p className="mt-1 text-2xl font-semibold text-[var(--color-text-strong)]">{summary.attention}</p>
+            </StatusTonePanel>
+            <StatusTonePanel tone="neutral" className="p-3">
+              <p className={`text-xs ${statusToneTextClass("neutral")}`}>Offline</p>
+              <p className="mt-1 text-2xl font-semibold text-[var(--color-text-strong)]">{summary.offline}</p>
+            </StatusTonePanel>
           </CardContent>
         </Card>
 
@@ -316,18 +308,18 @@ export function ConnectionsManagement() {
           </CardHeader>
           <CardContent className="space-y-5">
             {focusState ? (
-              <div className={`rounded-2xl border p-4 ${focusToneClasses(focusState.tone)}`}>
+              <StatusTonePanel tone={focusState.tone === "offline" ? "neutral" : focusState.tone}>
                 <p className="text-xs uppercase tracking-[0.3em] text-[var(--color-text-muted)]">
                   {focusState.tone === "good" ? "Ready" : focusState.tone === "watch" ? "Watch" : "Offline"}
                 </p>
                 <p className="mt-2 text-lg font-semibold text-[var(--color-text-strong)]">{focusState.title}</p>
-                <p className="mt-1 text-sm text-zinc-700 dark:text-zinc-300">{focusState.detail}</p>
+                <p className="mt-1 text-sm text-[var(--color-text-muted)]">{focusState.detail}</p>
                 {focusState.action ? (
                   <Button asChild size="sm" variant="ghost" className="mt-3">
                     <Link href={focusState.action.href}>{focusState.action.label}</Link>
                   </Button>
                 ) : null}
-              </div>
+              </StatusTonePanel>
             ) : (
               <p className="rounded-2xl border border-dashed border-zinc-300 bg-zinc-50 px-4 py-3 text-sm text-zinc-600 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300">
                 Pick a connection to see a calm summary of its readiness.
@@ -335,27 +327,12 @@ export function ConnectionsManagement() {
             )}
 
             <div className="grid gap-3 md:grid-cols-3">
-              <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-800 dark:bg-zinc-900">
-                <p className="text-xs text-zinc-500">Auth status</p>
-                <p className="mt-1 text-base font-medium text-zinc-900 dark:text-zinc-100">
-                  {detailConnection ? authLabel(detailConnection.auth) : "—"}
-                </p>
-              </div>
-              <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-800 dark:bg-zinc-900">
-                <p className="text-xs text-zinc-500">Latency</p>
-                <p className="mt-1 text-base font-medium text-zinc-900 dark:text-zinc-100">
-                  {detailConnection?.latency ?? "—"}
-                </p>
-              </div>
-              <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-800 dark:bg-zinc-900">
-                <p className="text-xs text-zinc-500">Last checked</p>
-                <p className="mt-1 text-base font-medium text-zinc-900 dark:text-zinc-100">
-                  {detailConnection?.lastChecked ?? "—"}
-                </p>
-              </div>
+              <InfoTile label="Auth status" value={detailConnection ? authLabel(detailConnection.auth) : "—"} />
+              <InfoTile label="Latency" value={detailConnection?.latency ?? "—"} />
+              <InfoTile label="Last checked" value={detailConnection?.lastChecked ?? "—"} />
             </div>
 
-            <p className="text-sm text-zinc-500 dark:text-zinc-400" aria-live="polite">
+            <p className="text-sm text-[var(--color-text-soft)]" aria-live="polite">
               {detailConnection ? `Latest note: ${detailConnection.note}` : "Awaiting details..."}
             </p>
           </CardContent>

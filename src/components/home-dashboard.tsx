@@ -26,8 +26,7 @@ import { HomeWidgetId, useClawboardState } from "@/lib/clawboard-state";
 import { EmptyState, ErrorState, LoadingState } from "@/components/ui/async-states";
 import { fetchHomeOverview, HomeOverview } from "@/lib/openclaw-client";
 import { useOpenClawResource } from "@/hooks/use-openclaw-resource";
-
-type StatusTone = "good" | "watch" | "neutral";
+import { StatusTonePanel, type StatusTone, statusToneTextClass } from "@/components/ui/status-tone";
 
 type QuickActionItem = {
   label: string;
@@ -69,16 +68,6 @@ function signalToneIcon(tone: StatusTone) {
   return CircleDashed;
 }
 
-function signalToneClasses(tone: StatusTone) {
-  if (tone === "good") {
-    return "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/40 dark:bg-emerald-500/10 dark:text-emerald-200";
-  }
-  if (tone === "watch") {
-    return "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200";
-  }
-  return "border-zinc-200 bg-zinc-50 text-zinc-900 dark:border-zinc-700/60 dark:bg-zinc-900/50 dark:text-zinc-100";
-}
-
 function renderWidget(id: HomeWidgetId, homeData: HomeOverview) {
   const signals = homeData.signals ?? [];
   const activeJobs = homeData.activeJobs ?? [];
@@ -102,18 +91,15 @@ function renderWidget(id: HomeWidgetId, homeData: HomeOverview) {
               {signals.map((signal) => {
                 const Icon = signalToneIcon(signal.tone);
                 return (
-                  <div
-                    key={signal.label}
-                    className={`rounded-2xl border p-4 ${signalToneClasses(signal.tone)}`}
-                  >
+                  <StatusTonePanel key={signal.label} tone={signal.tone}>
                     <div className="flex items-center justify-between gap-2">
-                      <p className="text-xs font-semibold uppercase tracking-[0.3em] text-zinc-700 dark:text-zinc-200">
+                      <p className={`text-xs font-semibold uppercase tracking-[0.3em] ${statusToneTextClass(signal.tone)}`}>
                         {signal.label}
                       </p>
-                      <Icon className="size-4" />
+                      <Icon className={`size-4 ${statusToneTextClass(signal.tone)}`} />
                     </div>
-                    <p className="mt-3 text-2xl font-semibold">{signal.value}</p>
-                  </div>
+                    <p className="mt-3 text-2xl font-semibold text-[var(--color-text-strong)]">{signal.value}</p>
+                  </StatusTonePanel>
                 );
               })}
             </div>

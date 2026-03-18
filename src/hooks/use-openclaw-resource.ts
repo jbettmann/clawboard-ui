@@ -20,7 +20,6 @@ export function useOpenClawResource<T>(fetcher: () => Promise<T>, deps: unknown[
   useEffect(() => {
     let canceled = false;
     setState("loading");
-    setPayload(null);
     setError(null);
 
     fetcher()
