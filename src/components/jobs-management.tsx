@@ -258,7 +258,7 @@ export function JobsManagement() {
 
   if (status === "loading") {
     return (
-      <div className="space-y-5 pb-6">
+      <div className="page-shell">
         {header}
         <LoadingState title="Loading jobs" description="Fetching live scheduler data from OpenClaw…" />
       </div>
@@ -267,7 +267,7 @@ export function JobsManagement() {
 
   if (status === "error") {
     return (
-      <div className="space-y-5 pb-6">
+      <div className="page-shell">
         {header}
         <ErrorState
           title="Unable to load jobs"
@@ -284,7 +284,7 @@ export function JobsManagement() {
 
   if (!jobs.length) {
     return (
-      <div className="space-y-5 pb-6">
+      <div className="page-shell">
         {header}
         <EmptyState
           title="No jobs to show"
@@ -300,7 +300,7 @@ export function JobsManagement() {
   }
 
   return (
-    <div className="space-y-5 pb-6">
+    <div className="page-shell">
       {header}
 
       <section className="grid gap-4 md:grid-cols-3">

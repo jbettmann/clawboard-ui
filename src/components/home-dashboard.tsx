@@ -21,6 +21,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { PatternCard } from "@/components/ui/pattern-card";
 import { PageHeader } from "@/components/page-header";
 import { HomeWidgetId, useClawboardState } from "@/lib/clawboard-state";
 import { EmptyState, ErrorState, LoadingState } from "@/components/ui/async-states";
@@ -75,7 +76,7 @@ function renderWidget(id: HomeWidgetId, homeData: HomeOverview) {
 
   if (id === "morning-brief") {
     return (
-      <Card key={id}>
+      <PatternCard role="metric" key={id}>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-xl">
             <Sparkles className="size-5 text-[var(--color-accent-primary)]" />
@@ -120,13 +121,13 @@ function renderWidget(id: HomeWidgetId, homeData: HomeOverview) {
             </div>
           )}
         </CardContent>
-      </Card>
+      </PatternCard>
     );
   }
 
   if (id === "quick-actions") {
     return (
-      <Card key={id}>
+      <PatternCard role="action" key={id}>
         <CardHeader>
           <CardTitle className="text-xl">Next actions</CardTitle>
           <CardDescription className="text-base">
@@ -151,13 +152,13 @@ function renderWidget(id: HomeWidgetId, homeData: HomeOverview) {
             </Button>
           ))}
         </CardContent>
-      </Card>
+      </PatternCard>
     );
   }
 
   if (id === "active-jobs") {
     return (
-      <Card key={id}>
+      <PatternCard role="list" key={id}>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-xl">
             <Timer className="size-5 text-zinc-500" />
@@ -208,12 +209,12 @@ function renderWidget(id: HomeWidgetId, homeData: HomeOverview) {
             </div>
           )}
         </CardContent>
-      </Card>
+      </PatternCard>
     );
   }
 
   return (
-    <Card key={id}>
+    <PatternCard role="list" key={id}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-xl">
           <Pin className="size-5 text-zinc-500" />
@@ -251,7 +252,7 @@ function renderWidget(id: HomeWidgetId, homeData: HomeOverview) {
           </div>
         )}
       </CardContent>
-    </Card>
+    </PatternCard>
   );
 }
 
@@ -511,7 +512,7 @@ export function HomeDashboard() {
   })();
 
   return (
-    <div className="space-y-5 pb-6">
+    <div className="page-shell">
       <PageHeader
         title="Home"
         context="Live OpenClaw context, attention signals, and the next steps you can take."

@@ -11,11 +11,11 @@ function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
 }
 
 function CardTitle({ className, ...props }: React.ComponentProps<"h3">) {
-  return <h3 className={cn("text-base font-semibold tracking-tight text-[var(--color-text-strong)]", className)} {...props} />;
+  return <h3 className={cn("type-role-section-title", className)} {...props} />;
 }
 
 function CardDescription({ className, ...props }: React.ComponentProps<"p">) {
-  return <p className={cn("mt-1 text-sm leading-6 text-[var(--color-text-muted)]", className)} {...props} />;
+  return <p className={cn("type-role-body mt-1", className)} {...props} />;
 }
 
 function CardContent({ className, ...props }: React.ComponentProps<"div">) {

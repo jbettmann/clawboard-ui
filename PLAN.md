@@ -1,165 +1,157 @@
-# Clawboard UI – Update Plan (Design + Data + Component Overhaul)
+# Clawboard UI – Execution Plan
 
-## Approved Plan
+## Status
 
-### Phase 1 — Foundation: full-width shell, theme architecture, and design tokens
-1. Replace the constrained centered shell with a true full-width responsive app layout.
-2. Introduce a semantic design token system for surfaces, text, borders, states, and accent usage.
-3. Add intentional light / dark / system theme support with a visible toggle and persisted preference.
-4. Replace the current sky-accent styling with a balanced `red-400` accent system paired with neutrals.
-5. Standardize spacing, typography, elevation, radius, focus states, and transitions.
-6. Validate with lint and production build.
+### Completed
+- **Phase 1:** shadcn sidebar adoption + theme toggle moved to persistent top-right header
+- **Phase 2:** design research completed and captured in `DESIGN_AUDIT.md`
+- **Phase 3:** core design-system and hierarchy pass implemented in code (this branch/PR)
 
-### Phase 2 — Navigation overhaul with shadcn sidebar
-1. Replace the custom navigation with shadcn sidebar as the primary navigation system.
-2. Add desktop expanded/collapsed behavior, mobile drawer behavior, and persisted sidebar preference where appropriate.
-3. Rework the global layout so every screen feels part of one unified dashboard.
-4. Establish a consistent page header pattern with title, context, primary action, and supporting status.
-5. Validate with lint and production build.
+### Current Gate
+- Awaiting Phase 3 review/merge before starting Phase 4.
 
-### Phase 3 — Real data foundation and read-only live wiring
-1. Add a shared OpenClaw client layer using the existing compatibility config.
-2. Define typed domain models for skills, jobs, job history, outputs, daily briefs, chat sessions/messages, and connection/system health.
-3. Add shared async state handling for loading, error, and empty states.
-4. Replace all mock read-path data with live OpenClaw data.
-5. Wire the dashboard to actual user-visible OpenClaw data across all screens.
-6. Validate with lint and production build.
+## Phase 3+ Implementation Plan
 
-### Phase 4 — Home/dashboard redesign around real user context
-1. Redesign Home so it immediately answers: what am I looking at, what needs attention, and what can I do next?
-2. Replace demo cards with real sections driven by live OpenClaw data.
-3. Remove internal/dev-facing framing like “Phase X”.
-4. Design clean, useful empty states for brand-new users without fake filler.
-5. Validate with lint and production build.
+### Phase 3 — Core design system and page hierarchy
+Goal: apply the highest-impact cross-app visual changes that affect every screen.
 
-### Phase 5 — Skills and jobs product surfaces with real state
-1. Rebuild Skills around real inventory, built-in vs custom distinctions, enabled/disabled state, and useful metadata.
-2. Rebuild Jobs around real scheduler data including active/scheduled/paused states and run history.
-3. Improve information hierarchy and list-detail flows.
-4. Enable real write actions only where supported and safe by the OpenClaw API.
-5. Validate with lint and production build.
+1. Establish a strict typography role system across the app:
+   - kicker / eyebrow
+   - section title
+   - card title
+   - metric value
+   - body / support text
+   - metadata / captions
+2. Standardize card anatomy into reusable patterns:
+   - metric card
+   - alert card
+   - list card
+   - action card
+   - settings card
+3. Introduce a consistent two-tier page hierarchy on every major screen:
+   - top = mission-critical summary / actions
+   - below = supporting detail modules
+4. Normalize accent-color usage so `red-400` is reserved for high-value intent:
+   - primary action
+   - selected context
+   - critical / elevated state
+5. Tighten page-level spacing rhythm so screens stop feeling visually inconsistent.
+6. Validate with `npm run lint` and `npm run build`.
 
-### Phase 6 — Outputs, briefs, and chat/agent activity with live data
-1. Replace local output state with real outputs and daily briefs.
-2. Clearly distinguish daily briefs, job outputs, agent outputs, and saved/pinned items.
-3. Rebuild chat/activity around real sessions and real message history.
-4. Connect composer/send actions to the real OpenClaw execution flow where supported safely.
-5. Validate with lint and production build.
+**Why first:** This phase creates the shared visual language everything else depends on.
 
-### Phase 7 — Connections, status, and system observability
-1. Replace env-only compatibility views with real runtime health/status.
-2. Show actual gateway status, node/device health, auth/connectivity state, and recent issues.
-3. Simplify status/history views so they are actionable instead of debuggy.
-4. Improve troubleshooting flows so users understand what is broken, what it impacts, and what to do next.
-5. Validate with lint and production build.
+---
 
-### Phase 8 — Final polish, responsiveness, and interaction quality
-1. Refine responsive behavior across screen sizes.
-2. Tighten alignment, spacing rhythm, and typographic hierarchy everywhere.
-3. Add polished hover, pressed, focus, loading, and transition states.
-4. Normalize reusable patterns across all surfaces.
-5. QA light mode and dark mode separately so both feel first-class.
-6. Final benchmark pass against Airbnb, Linear, Notion, Stripe Dashboard, and Vercel quality expectations.
-7. Validate with lint and production build.
+### Phase 4 — Status semantics and interaction-state unification
+Goal: make state meaning consistent, fast to scan, and trustworthy.
 
-## Checklist Status
+1. Define and apply a unified status grammar across the app:
+   - healthy
+   - watch
+   - offline
+   - risk
+   - loading
+   - empty
+   - error
+2. Standardize status badges, banners, panels, and inline indicators so the same state looks the same everywhere.
+3. Unify interactive behavior across controls:
+   - default
+   - hover
+   - active
+   - selected
+   - focus-visible
+   - disabled
+   - loading
+4. Improve recovery-state UX:
+   - empty states
+   - loading states
+   - error messaging
+   - retry / next-step placement
+5. Validate with `npm run lint` and `npm run build`.
 
-### Phase 1
-- [x] Full-width responsive shell implemented
-- [x] Semantic design token system introduced
-- [x] Light / dark / system theme support with persisted toggle added
-- [x] `red-400` accent system applied to shared foundation
-- [x] Shared spacing / typography / elevation / interaction primitives tightened
-- [x] Validation run (`npm run lint`, `npm run build`)
+**Why second:** Clawboard is operational UI; inconsistent state semantics destroy trust faster than spacing issues.
 
-### Phase 2
-- [x] shadcn sidebar implemented as primary navigation
-- [x] Desktop collapse + mobile drawer behavior added
-- [x] Sidebar preference persistence added where appropriate
-- [x] Global page header framework standardized
-- [x] Validation run (`npm run lint`, `npm run build`)
+---
 
-### Phase 3
-- [x] Shared OpenClaw API client added
-- [x] Typed live-data domain models added
-- [x] Shared loading / error / empty-state primitives added
-- [x] Mock read-path data removed from all screens
-- [x] Read-only live data wired across dashboard surfaces
-- [x] Validation run (`npm run lint`, `npm run build`)
+### Phase 5 — Navigation, header, and high-frequency workflow refinement
+Goal: make the shell faster and more useful for repeated operator flows.
 
-### Phase 4
-- [x] Home redesigned around real user context and next actions
-- [x] Real live-data sections replace demo cards
-- [x] Internal/dev-facing framing removed
-- [x] Empty states for new users implemented without mock filler
-- [x] Validation run (`npm run lint`, `npm run build`)
+1. Upgrade sidebar behavior with room for:
+   - pinned destinations
+   - recent destinations/views
+   - clearer active-context treatment
+2. Refine the header so top-right actions follow the audit guidance consistently.
+3. Add contextual page actions in stable, expected locations.
+4. Reduce click cost for frequent workflows by improving nav/action placement.
+5. Validate responsive behavior for desktop and mobile shell interactions.
+6. Validate with `npm run lint` and `npm run build`.
 
-### Phase 5
-- [x] Skills rebuilt around real inventory and status
-- [x] Jobs rebuilt around real scheduler state and history
-- [x] List-detail flows and hierarchy improved
-- [x] Safe supported write actions enabled where available
-- [x] Validation run (`npm run lint`, `npm run build`)
+**Why third:** After the visual system is stabilized, shell-level workflow improvements can be applied cleanly.
 
-### Phase 6
-- [x] Outputs and daily briefs wired to live data
-- [x] Output types clearly distinguished in UI
-- [x] Chat/activity rebuilt around real sessions and history
-- [x] Real send/execution flow connected where supported safely
-- [x] Validation run (`npm run lint`, `npm run build`)
+---
 
-### Phase 7
-- [x] Real runtime health/status replaces env-only views
-- [x] Gateway/node/auth/connectivity states surfaced clearly
-- [x] Status/history views simplified and made actionable
-- [x] Troubleshooting UX improved with clear next steps
-- [x] Validation run (`npm run lint`, `npm run build`)
+### Phase 6 — Density tuning by surface type
+Goal: make overview, monitoring, and settings screens feel intentionally different instead of inconsistently spaced.
 
-### Phase 8
-- [x] Responsive behavior refined across common screen sizes
-- [x] Spacing, alignment, and type hierarchy polished throughout
-- [x] Hover / focus / pressed / loading / transition states polished
-- [x] Reusable patterns normalized across surfaces
-- [x] Light and dark mode QA pass completed
-- [x] Final benchmark polish pass completed
-- [x] Validation run (`npm run lint`, `npm run build`)
+1. Define density modes for:
+   - overview surfaces
+   - monitoring / operations surfaces
+   - settings / configuration surfaces
+2. Apply mode-specific spacing, row height, card padding, and grouping rules.
+3. Rebalance dense screens for scan efficiency without making calm surfaces feel cramped.
+4. Preserve readability in both light and dark mode.
+5. Validate with `npm run lint` and `npm run build`.
 
-## Current State
+**Why fourth:** Density is easier to tune after shared hierarchy, status semantics, and shell patterns are stable.
 
-The repository has now completed the full approved Phase 1–8 plan:
+---
 
-- The dashboard remains full-width, theme-aware, and sidebar-led, with the shared foundation from Phases 1–2 intact.
-- Live OpenClaw data powers the primary product surfaces across home, skills, jobs, outputs, chat, connections, and settings.
-- Observability work from Phase 7 remains in place with runtime health, clearer connection guidance, and a more actionable status/history flow.
-- Phase 8 polish has tightened spacing, hierarchy, hover/focus/pressed states, loading/empty/error treatments, and responsive behavior through shared primitives rather than one-off screen patches.
-- Light and dark mode now share the same visual language more intentionally through updated surface, overlay, and accent treatment.
+### Phase 7 — Settings and configuration model cleanup
+Goal: make settings predictable by scope and reduce ambiguity about what controls affect.
 
-### Done
-- New multi-phase redesign + live-data migration plan approved.
-- `PLAN.md` rewritten to reflect the updated execution plan.
-- Phase 1 foundation work completed across layout, theming, tokens, and shared UI primitives.
-- Validation completed for Phase 1 with successful `npm run lint` and `npm run build`.
-- Phase 2 navigation overhaul completed with a sidebar-driven shell, mobile/desktop navigation states, and a shared page header framework.
-- Validation completed for Phase 2 with successful `npm run lint` and `npm run build`.
-- Phase 3 real-data foundation completed with a shared OpenClaw client, typed domain models, async data primitives, and read-only live wiring across dashboard surfaces.
-- Validation completed for Phase 3 with successful `npm run lint` and `npm run build`.
-- Phase 4 home redesign completed around real user context, attention signals, and clear next actions using the live-data foundation.
-- Validation completed for Phase 4 with successful `npm run lint` and `npm run build`.
-- Reset audit for Phases 1–4 completed and cleanup changes applied to close the missing implementation gaps discovered during the audit.
-- Reset cleanup validation completed with successful `npm run lint` and `npm run build`.
-- Phase 5 skills and jobs product-surface work completed with stronger live inventory/scheduler detail, run-history visibility, and improved hierarchy.
-- Validation completed for Phase 5 with successful `npm run lint` and `npm run build`.
-- Phase 6 outputs/briefs/chat work completed with real daily brief coverage, clearer agent-output distinctions, and live chat send/history integration.
-- Validation completed for Phase 6 with successful `npm run lint` and `npm run build`.
-- Reset audit for Phases 1–7 completed and cleanup changes applied to close the missing implementation gaps discovered during the audit.
-- Runtime health was added to Settings, output pin/save state now seeds from live metadata and persists across refreshes, and the connections/status surfaces were rewritten to be more actionable.
-- Reset cleanup validation for Phases 1–7 completed with successful `npm run lint` and `npm run build`.
-- Phase 8 final polish completed across shared visual primitives, spacing, hierarchy, responsive behavior, and interaction states.
-- Light and dark mode were both rebalanced through shared surface, overlay, button, state, and header treatments.
-- Validation completed for Phase 8 with successful `npm run lint` and `npm run build`.
+1. Reorganize settings/personalization around explicit scopes:
+   - user-level
+   - workspace-level
+   - page/widget-level
+2. Standardize toggle language, helper text, and destructive/safe affordances.
+3. Make configuration impact clear before users commit a change.
+4. Align settings cards and controls with the shared card/state system from earlier phases.
+5. Validate with `npm run lint` and `npm run build`.
 
-### Now
-- The final Phase 8 polish PR is ready for review and merge.
+**Why fifth:** Settings cleanup depends on the shared visual/state rules established earlier.
 
-### Next
-- If this PR is merged, the approved PLAN.md scope is complete.
+---
+
+### Phase 8 — Final polish and benchmark pass
+Goal: close remaining quality gaps against the references after the structural work is done.
+
+1. Run a full product-wide polish pass against `DESIGN_AUDIT.md`.
+2. Tighten any remaining issues in:
+   - spacing
+   - typography
+   - accent restraint
+   - hover/focus transitions
+   - responsive behavior
+3. Verify the implemented result against the benchmark expectations from:
+   - Airbnb
+   - Linear
+   - Notion
+   - Stripe Dashboard
+   - Vercel
+4. Validate with `npm run lint` and `npm run build`.
+
+**Why last:** This phase should refine a mostly-correct system, not patch around unfinished foundations.
+
+## Workflow Rule for Each Phase
+For every approved phase:
+1. implement only that phase
+2. verify in code
+3. run `npm run lint`
+4. run `npm run build`
+5. create a dedicated branch
+6. commit only that phase’s changes
+7. push and open a PR
+8. stop and wait for approval / merge before starting the next phase
+
+## Next Required User Decision
+Approve or revise the Phase 3–8 breakdown above.
