@@ -181,18 +181,23 @@ export function OutputsManagement() {
             {selectedOutput.pinned ? "Unpin from Home" : "Pin to Home"}
           </Button>
         }
+        pageActions={
+          <>
+            <Button variant="ghost" size="sm" onClick={refreshOutputs}>
+              Refresh outputs
+            </Button>
+            <Button variant="ghost" size="sm" onClick={refreshBriefs}>
+              Refresh briefs
+            </Button>
+          </>
+        }
       />
 
       <div className="grid gap-5 lg:grid-cols-[340px_1fr]">
         <Card>
-          <CardHeader className="flex items-center justify-between gap-4">
-            <div>
-              <CardTitle>Output feed</CardTitle>
-              <CardDescription>Most recent and high-value outputs in one calm list.</CardDescription>
-            </div>
-            <Button variant="ghost" size="sm" onClick={refreshOutputs}>
-              Refresh outputs
-            </Button>
+          <CardHeader className="space-y-1">
+            <CardTitle>Output feed</CardTitle>
+            <CardDescription>Most recent and high-value outputs in one calm list.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex flex-wrap gap-2 pb-2">
@@ -394,15 +399,10 @@ export function OutputsManagement() {
 
       <div className="grid gap-5 lg:grid-cols-2">
         <Card>
-          <CardHeader className="flex flex-col gap-2">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2">
-                <Sparkles className="size-4 text-zinc-500" />
-                <CardTitle className="m-0">Daily briefs</CardTitle>
-              </div>
-              <Button variant="ghost" size="sm" onClick={refreshBriefs}>
-                Refresh briefs
-              </Button>
+          <CardHeader className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Sparkles className="size-4 text-zinc-500" />
+              <CardTitle className="m-0">Daily briefs</CardTitle>
             </div>
             <CardDescription>OpenClaw daily context summaries.</CardDescription>
           </CardHeader>

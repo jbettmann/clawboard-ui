@@ -235,6 +235,16 @@ export function StatusHistory() {
             Refresh
           </Button>
         }
+        pageActions={
+          <>
+            <Button asChild size="sm" variant="ghost">
+              <Link href="/connections">Connections center</Link>
+            </Button>
+            <Button asChild size="sm" variant="ghost">
+              <Link href="/settings/advanced">Status & history</Link>
+            </Button>
+          </>
+        }
       />
 
       <div>{snapshotContent}</div>
@@ -261,14 +271,6 @@ export function StatusHistory() {
               All systems look steady. Keep watching the timeline for new activity.
             </p>
           )}
-          <div className="flex flex-wrap gap-2 pt-2">
-            <Button asChild size="sm" variant="ghost">
-              <Link href="/connections">Connections center</Link>
-            </Button>
-            <Button asChild size="sm" variant="ghost">
-              <Link href="/settings/advanced">Status & history</Link>
-            </Button>
-          </div>
         </CardContent>
       </Card>
 
