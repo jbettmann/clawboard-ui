@@ -13,12 +13,10 @@ export function PageHeader({ title, context, primaryAction, supportingStatus }: 
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[var(--color-accent-border)] to-transparent" />
       <div className="relative flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
         <div className="max-w-3xl space-y-3">
-          <p className="eyebrow-label">Dashboard</p>
+          <p className="type-role-kicker">Dashboard</p>
           <div className="space-y-2">
-            <h1 className="text-3xl font-semibold leading-tight tracking-[-0.02em] text-[var(--color-text-strong)] sm:text-[2.15rem]">
-              {title}
-            </h1>
-            <p className="max-w-2xl text-sm leading-6 text-[var(--color-text-muted)] sm:text-[0.95rem]">{context}</p>
+            <h1 className="type-role-page-title">{title}</h1>
+            <p className="type-role-body max-w-2xl">{context}</p>
           </div>
         </div>
 

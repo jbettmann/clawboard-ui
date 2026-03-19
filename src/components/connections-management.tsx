@@ -142,7 +142,7 @@ export function ConnectionsManagement() {
 
   if (status === "loading") {
     return (
-      <div className="space-y-5 pb-6">
+      <div className="page-shell">
         {header}
         <LoadingState title="Loading connections" description="Fetching live gateway health from OpenClaw…" />
       </div>
@@ -151,7 +151,7 @@ export function ConnectionsManagement() {
 
   if (status === "error") {
     return (
-      <div className="space-y-5 pb-6">
+      <div className="page-shell">
         {header}
         <ErrorState
           title="Unable to load connections"
@@ -168,7 +168,7 @@ export function ConnectionsManagement() {
 
   if (!connections.length) {
     return (
-      <div className="space-y-5 pb-6">
+      <div className="page-shell">
         {header}
         <EmptyState
           title="No connections reported"
@@ -235,7 +235,7 @@ export function ConnectionsManagement() {
   ];
 
   return (
-    <div className="space-y-5 pb-6">
+    <div className="page-shell">
       {header}
 
       <div className="grid gap-5 lg:grid-cols-3">

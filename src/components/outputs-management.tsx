@@ -119,7 +119,7 @@ export function OutputsManagement() {
 
   if (!selectedOutput) {
     return (
-      <div className="space-y-5 pb-6">
+      <div className="page-shell">
         <PageHeader
           title="Outputs center"
           context="Review finished briefs, pin the useful ones, and keep clean detail views."
@@ -146,7 +146,7 @@ export function OutputsManagement() {
   }
 
   return (
-    <div className="space-y-5 pb-6">
+    <div className="page-shell">
       <PageHeader
         title="Outputs center"
         context="Review finished briefs, pin the useful ones, and keep clean detail views."

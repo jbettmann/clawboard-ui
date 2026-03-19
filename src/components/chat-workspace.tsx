@@ -173,7 +173,7 @@ export function ChatWorkspace() {
 
   if (sessionsStatus === "loading") {
     return (
-      <div className="space-y-5 pb-6">
+      <div className="page-shell">
         {header}
         <LoadingState title="Loading chat sessions" description="Connecting to OpenClaw sessions…" />
       </div>
@@ -182,7 +182,7 @@ export function ChatWorkspace() {
 
   if (sessionsStatus === "error") {
     return (
-      <div className="space-y-5 pb-6">
+      <div className="page-shell">
         {header}
         <ErrorState
           title="Unable to load chat sessions"
@@ -199,7 +199,7 @@ export function ChatWorkspace() {
 
   if (!sessions.length) {
     return (
-      <div className="space-y-5 pb-6">
+      <div className="page-shell">
         {header}
         <EmptyState
           title="No chat sessions yet"
@@ -227,7 +227,7 @@ export function ChatWorkspace() {
     : [];
 
   return (
-    <div className="space-y-5 pb-6">
+    <div className="page-shell">
       {header}
 
       <div className="grid gap-5 xl:grid-cols-[320px_1fr]">
