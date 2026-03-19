@@ -119,7 +119,7 @@ export function OutputsManagement() {
 
   if (!selectedOutput) {
     return (
-      <div className="page-shell">
+      <div className="page-shell" data-density-mode="operations">
         <PageHeader
           title="Outputs center"
           context="Review finished briefs, pin the useful ones, and keep clean detail views."
@@ -146,7 +146,7 @@ export function OutputsManagement() {
   }
 
   return (
-    <div className="page-shell">
+    <div className="page-shell" data-density-mode="operations">
       <PageHeader
         title="Outputs center"
         context="Review finished briefs, pin the useful ones, and keep clean detail views."
@@ -224,7 +224,7 @@ export function OutputsManagement() {
                     onClick={() => setSelectedOutputId(output.id)}
                     aria-pressed={isActive}
                     aria-label={`Open output ${output.title}`}
-                    className={`w-full rounded-xl border p-4 text-left transition-colors ${
+                    className={`density-row w-full rounded-xl border text-left transition-colors ${
                       isActive
                         ? "border-zinc-900 bg-zinc-900 text-zinc-50 dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900"
                         : "border-zinc-200 bg-zinc-50 hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:bg-zinc-800"
@@ -358,7 +358,7 @@ export function OutputsManagement() {
                   type="button"
                   onClick={() => setSelectedOutputId(output.id)}
                   aria-pressed={isActive}
-                  className={`w-full rounded-xl border px-4 py-3 text-left transition-colors ${
+                  className={`density-row w-full rounded-xl border text-left transition-colors ${
                     isActive
                       ? "border-zinc-900 bg-zinc-900 text-zinc-50 dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900"
                       : "border-zinc-200 bg-zinc-50 hover:border-zinc-300 hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700 dark:hover:bg-zinc-800"

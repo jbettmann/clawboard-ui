@@ -6,6 +6,15 @@
   --panel-gap: clamp(1rem, 1.8vw, 1.75rem);
   --layout-stack: clamp(0.875rem, 1vw, 1.25rem);
   --content-pad: clamp(1rem, 1.4vw, 1.5rem);
+  --density-panel-gap: var(--panel-gap);
+  --density-group-gap: clamp(0.9rem, 1.2vw, 1.25rem);
+  --density-card-pad-x: clamp(1.1rem, 1.5vw, 1.5rem);
+  --density-card-pad-top: clamp(1.1rem, 1.4vw, 1.45rem);
+  --density-card-pad-bottom: clamp(1rem, 1.3vw, 1.35rem);
+  --density-page-header-pad: clamp(1.15rem, 1.6vw, 1.6rem);
+  --density-row-min-h: 2.75rem;
+  --density-row-pad-y: 0.65rem;
+  --density-row-pad-x: 0.85rem;
 
   /* Typography */
   --font-sans: var(--font-geist-sans);
@@ -250,14 +259,46 @@ a {
 .page-shell {
   display: flex;
   flex-direction: column;
-  gap: var(--panel-gap);
+  gap: var(--density-panel-gap);
   padding-bottom: clamp(1.25rem, 2.5vw, 2rem);
+}
+
+.page-shell[data-density-mode="overview"] {
+  --density-panel-gap: clamp(1.2rem, 1.95vw, 1.85rem);
+  --density-group-gap: clamp(1rem, 1.4vw, 1.4rem);
+  --density-card-pad-x: clamp(1.25rem, 1.8vw, 1.65rem);
+  --density-card-pad-top: clamp(1.2rem, 1.8vw, 1.6rem);
+  --density-card-pad-bottom: clamp(1.05rem, 1.6vw, 1.45rem);
+  --density-page-header-pad: clamp(1.25rem, 1.9vw, 1.75rem);
+  --density-row-min-h: 3rem;
+}
+
+.page-shell[data-density-mode="operations"] {
+  --density-panel-gap: clamp(0.85rem, 1.25vw, 1.1rem);
+  --density-group-gap: clamp(0.65rem, 0.95vw, 0.95rem);
+  --density-card-pad-x: clamp(0.95rem, 1.2vw, 1.2rem);
+  --density-card-pad-top: clamp(0.9rem, 1.05vw, 1.1rem);
+  --density-card-pad-bottom: clamp(0.8rem, 1vw, 1.05rem);
+  --density-page-header-pad: clamp(1rem, 1.3vw, 1.3rem);
+  --density-row-min-h: 2.4rem;
+  --density-row-pad-y: 0.45rem;
+  --density-row-pad-x: 0.7rem;
+}
+
+.page-shell[data-density-mode="settings"] {
+  --density-panel-gap: clamp(1rem, 1.45vw, 1.35rem);
+  --density-group-gap: clamp(0.8rem, 1.1vw, 1.1rem);
+  --density-card-pad-x: clamp(1.05rem, 1.4vw, 1.35rem);
+  --density-card-pad-top: clamp(1rem, 1.3vw, 1.25rem);
+  --density-card-pad-bottom: clamp(0.9rem, 1.2vw, 1.15rem);
+  --density-page-header-pad: clamp(1.05rem, 1.45vw, 1.45rem);
+  --density-row-min-h: 2.7rem;
 }
 
 .page-tier-primary,
 .page-tier-secondary {
   display: grid;
-  gap: var(--panel-gap);
+  gap: var(--density-group-gap);
 }
 
 .page-tier-primary {
@@ -266,6 +307,30 @@ a {
 
 .page-tier-secondary {
   grid-template-columns: minmax(0, 1fr);
+}
+
+.page-header-shell {
+  padding: var(--density-page-header-pad);
+}
+
+.card-header-pad {
+  padding-top: var(--density-card-pad-top);
+  padding-inline: var(--density-card-pad-x);
+}
+
+.card-content-pad {
+  padding-bottom: var(--density-card-pad-bottom);
+  padding-inline: var(--density-card-pad-x);
+}
+
+.surface-group {
+  display: grid;
+  gap: var(--density-group-gap);
+}
+
+.density-row {
+  min-height: var(--density-row-min-h);
+  padding: var(--density-row-pad-y) var(--density-row-pad-x);
 }
 
 .card-metric,

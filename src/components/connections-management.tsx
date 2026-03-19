@@ -166,7 +166,7 @@ export function ConnectionsManagement() {
 
   if (status === "loading") {
     return (
-      <div className="page-shell">
+      <div className="page-shell" data-density-mode="operations">
         {header}
         <LoadingState title="Loading connections" description="Fetching live gateway health from OpenClaw…" />
       </div>
@@ -175,7 +175,7 @@ export function ConnectionsManagement() {
 
   if (status === "error") {
     return (
-      <div className="page-shell">
+      <div className="page-shell" data-density-mode="operations">
         {header}
         <ErrorState
           title="Unable to load connections"
@@ -192,7 +192,7 @@ export function ConnectionsManagement() {
 
   if (!connections.length) {
     return (
-      <div className="page-shell">
+      <div className="page-shell" data-density-mode="operations">
         {header}
         <EmptyState
           title="No connections reported"
@@ -259,7 +259,7 @@ export function ConnectionsManagement() {
   ];
 
   return (
-    <div className="page-shell">
+    <div className="page-shell" data-density-mode="operations">
       {header}
 
       <div className="grid gap-5 lg:grid-cols-3">
@@ -296,7 +296,7 @@ export function ConnectionsManagement() {
                 onClick={() => setSelectedId(item.id)}
                 aria-pressed={activeConnectionId === item.id}
                 aria-label={`Select connection ${item.name}`}
-                className={`rounded-xl border p-4 text-left transition-colors ${
+                className={`density-row rounded-xl border text-left transition-colors ${
                   activeConnectionId === item.id
                     ? "border-zinc-900 bg-zinc-900 text-zinc-50 dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900"
                     : "border-zinc-200 bg-zinc-50 hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:bg-zinc-800"

@@ -72,7 +72,7 @@ export default function SettingsPage() {
   const servicesCount = health?.services ? Object.keys(health.services).length : 0;
 
   return (
-    <div className="page-shell">
+    <div className="page-shell" data-density-mode="settings">
       <PageHeader
         title="Settings"
         context="Runtime health first, with compatibility details right below."

@@ -200,7 +200,7 @@ export function SkillsManagement() {
 
   if (status === "loading") {
     return (
-      <div className="page-shell">
+      <div className="page-shell" data-density-mode="settings">
         {header}
         <LoadingState title="Loading skills" description="Pulling live inventory from OpenClaw…" />
       </div>
@@ -209,7 +209,7 @@ export function SkillsManagement() {
 
   if (status === "error") {
     return (
-      <div className="page-shell">
+      <div className="page-shell" data-density-mode="settings">
         {header}
         <ErrorState
           title="Unable to load skills"
@@ -226,7 +226,7 @@ export function SkillsManagement() {
 
   if (!sortedSkills.length) {
     return (
-      <div className="page-shell">
+      <div className="page-shell" data-density-mode="settings">
         {header}
         <EmptyState
           title="No skills surfaced"
@@ -242,7 +242,7 @@ export function SkillsManagement() {
   }
 
   return (
-    <div className="page-shell">
+    <div className="page-shell" data-density-mode="settings">
       {header}
 
       <div className="grid gap-5 lg:grid-cols-[360px_1fr]">
