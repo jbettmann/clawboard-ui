@@ -34,6 +34,10 @@
   --color-state-good: #22c55e;
   --color-state-watch: #f97316;
   --color-state-neutral: #64748b;
+  --color-state-offline: #475569;
+  --color-state-risk: #ef4444;
+  --color-state-loading: #38bdf8;
+  --color-state-empty: #94a3b8;
 
   /* Accent */
   --color-accent-primary: #f87171;

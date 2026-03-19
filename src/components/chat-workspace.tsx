@@ -19,6 +19,8 @@ import {
   type SessionsSendResult,
 } from "@/lib/openclaw-client";
 import { useOpenClawResource } from "@/hooks/use-openclaw-resource";
+import { StatusBadge } from "@/components/ui/status";
+import { mapSessionActivityToStatus } from "@/lib/status-grammar";
 
 const ROLE_ICON_MAP: Record<ChatMessageRole, LucideIcon> = {
   assistant: BotMessageSquare,
@@ -43,13 +45,16 @@ const MESSAGE_STYLES: Record<ChatMessageRole, string> = {
 };
 
 function activityBadge(activity: ChatSessionActivity) {
-  if (activity === "active") {
-    return <Badge className="bg-[var(--color-state-good)] text-[var(--color-surface-card)]">Active now</Badge>;
-  }
-  if (activity === "waiting") {
-    return <Badge className="bg-[var(--color-state-watch)] text-[var(--color-surface-card)]">Waiting</Badge>;
-  }
-  return <Badge variant="muted">Complete</Badge>;
+  const status = mapSessionActivityToStatus(activity);
+  const label = activity === "active" ? "Active now" : activity === "waiting" ? "Waiting" : "Complete";
+  return (
+    <StatusBadge
+      status={status}
+      label={label}
+      showIcon={false}
+      className="text-[0.6rem]"
+    />
+  );
 }
 
 function activityLabel(activity: ChatSessionActivity) {
@@ -244,8 +249,10 @@ export function ChatWorkspace() {
             </div>
           </CardHeader>
           <CardContent className="space-y-3">
-            {sessions.map((session) => (
-              <button
+            {sessions.map((session) => {
+              const sessionStatus = mapSessionActivityToStatus(session.activity);
+              return (
+                <button
                 key={session.id}
                 type="button"
                 onClick={() => setSelectedSessionId(session.id)}
@@ -261,7 +268,12 @@ export function ChatWorkspace() {
                   <p className="text-base font-semibold">{session.title}</p>
                   <div className="flex items-center gap-1">
                     {activityBadge(session.activity)}
-                    <Badge variant="muted">{capitalize(session.status)}</Badge>
+                    <StatusBadge
+                      status={sessionStatus}
+                      label={capitalize(session.status)}
+                      showIcon={false}
+                      className="text-[0.6rem]"
+                    />
                   </div>
                 </div>
                 <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{session.channel}</p>
@@ -270,7 +282,8 @@ export function ChatWorkspace() {
                   <span>Updated {formatTimestamp(session.updatedAt)}</span>
                 </div>
               </button>
-            ))}
+              );
+            })}
           </CardContent>
         </Card>
 
