@@ -13,12 +13,20 @@ import { fetchConnections, type Connection } from "@/lib/openclaw-client";
 import { getOpenClawCompatibilityConfig, resolveApiBaseUrl } from "@/lib/openclaw-compat";
 import { useOpenClawResource } from "@/hooks/use-openclaw-resource";
 import { InfoTile } from "@/components/ui/info-tile";
-import { StatusTonePanel, statusToneTextClass } from "@/components/ui/status-tone";
+import { StatusBadge, StatusPanel, statusLabel, statusTextClass } from "@/components/ui/status";
+import { mapConnectionHealthToStatus, type StatusVariant } from "@/lib/status-grammar";
 
 function healthBadge(health: Connection["health"]) {
-  if (health === "healthy") return <Badge className="bg-[var(--color-state-good)] text-[var(--color-surface-card)]">Healthy</Badge>;
-  if (health === "attention") return <Badge className="bg-[var(--color-state-watch)] text-[var(--color-surface-card)]">Needs attention</Badge>;
-  return <Badge variant="muted">Offline</Badge>;
+  const status = mapConnectionHealthToStatus(health);
+  const label = health === "healthy" ? "Healthy" : health === "attention" ? "Needs attention" : "Offline";
+  return (
+    <StatusBadge
+      status={status}
+      label={label}
+      showIcon={false}
+      className="text-[0.6rem] uppercase tracking-[0.3em]"
+    />
+  );
 }
 
 function authLabel(state: Connection["auth"]) {
@@ -27,12 +35,12 @@ function authLabel(state: Connection["auth"]) {
   return "Not connected";
 }
 
-type FocusTone = "good" | "watch" | "offline";
-
 type FocusState = {
-  tone: FocusTone;
+  status: StatusVariant;
   title: string;
   detail: string;
+  helper: string;
+  statusLabel: string;
   action?: { label: string; href: string };
 };
 
@@ -51,37 +59,45 @@ function describeFocusState(connection: Connection | null): FocusState | null {
 
   if (connection.health === "offline") {
     return {
-      tone: "offline",
       title: "Offline and paused",
       detail:
         "This gateway is not reachable right now. Confirm the gateway network and restart the service if needed.",
+      helper: "Bring the gateway back online before routing traffic through it.",
+      status: "offline",
+      statusLabel: "Offline",
       action: { label: "Open status & history", href: "/settings/advanced" },
     };
   }
 
   if (connection.auth !== "connected") {
     return {
-      tone: "watch",
       title: "Authentication needed",
       detail: "Credentials need refreshing so the gateway can resume handling traffic safely.",
+      helper: "Refresh the credentials so requests can flow securely.",
+      status: "risk",
+      statusLabel: "Needs auth",
       action: { label: "Open settings", href: "/settings" },
     };
   }
 
   if (connection.health === "attention") {
     return {
-      tone: "watch",
       title: "Attention recommended",
       detail:
         "Gateway is online but flagged for review. Take a minute to check latency and connected devices before relying on it.",
+      helper: "Review telemetry and revisit once health is calm.",
+      status: "watch",
+      statusLabel: "Attention recommended",
       action: { label: "Open status & history", href: "/settings/advanced" },
     };
   }
 
   return {
-    tone: "good",
     title: "Ready to route traffic",
     detail: "Auth and health are green. Keep monitoring, and let this connection serve as expected.",
+    helper: "This node is cleared for live use. Monitor if anything changes.",
+    status: "healthy",
+    statusLabel: "Ready",
   };
 }
 
@@ -107,6 +123,14 @@ export function ConnectionsManagement() {
     const offline = connections.filter((item) => item.health === "offline").length;
     return { healthy, attention, offline };
   }, [connections]);
+
+  const summaryTiles = (
+    [
+      { status: "healthy" as StatusVariant, label: "Healthy", value: summary.healthy },
+      { status: "watch" as StatusVariant, label: "Needs attention", value: summary.attention },
+      { status: "offline" as StatusVariant, label: "Offline", value: summary.offline },
+    ]
+  );
 
   const focusState = useMemo(() => describeFocusState(detailConnection), [detailConnection]);
 
@@ -248,18 +272,14 @@ export function ConnectionsManagement() {
             <CardDescription>Counts refresh live so you can focus on connections that need attention.</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3">
-            <StatusTonePanel tone="good" className="p-3">
-              <p className={`text-xs ${statusToneTextClass("good")}`}>Healthy</p>
-              <p className="mt-1 text-2xl font-semibold text-[var(--color-text-strong)]">{summary.healthy}</p>
-            </StatusTonePanel>
-            <StatusTonePanel tone="watch" className="p-3">
-              <p className={`text-xs ${statusToneTextClass("watch")}`}>Needs attention</p>
-              <p className="mt-1 text-2xl font-semibold text-[var(--color-text-strong)]">{summary.attention}</p>
-            </StatusTonePanel>
-            <StatusTonePanel tone="neutral" className="p-3">
-              <p className={`text-xs ${statusToneTextClass("neutral")}`}>Offline</p>
-              <p className="mt-1 text-2xl font-semibold text-[var(--color-text-strong)]">{summary.offline}</p>
-            </StatusTonePanel>
+            {summaryTiles.map((item) => (
+              <StatusPanel key={item.label} status={item.status} className="p-3">
+                <p className={`text-xs font-semibold uppercase tracking-[0.3em] ${statusTextClass(item.status)}`}>
+                  {item.label}
+                </p>
+                <p className="mt-1 text-2xl font-semibold text-[var(--color-text-strong)]">{item.value}</p>
+              </StatusPanel>
+            ))}
           </CardContent>
         </Card>
 
@@ -308,18 +328,29 @@ export function ConnectionsManagement() {
           </CardHeader>
           <CardContent className="space-y-5">
             {focusState ? (
-              <StatusTonePanel tone={focusState.tone === "offline" ? "neutral" : focusState.tone}>
-                <p className="text-xs uppercase tracking-[0.3em] text-[var(--color-text-muted)]">
-                  {focusState.tone === "good" ? "Ready" : focusState.tone === "watch" ? "Watch" : "Offline"}
-                </p>
-                <p className="mt-2 text-lg font-semibold text-[var(--color-text-strong)]">{focusState.title}</p>
-                <p className="mt-1 text-sm text-[var(--color-text-muted)]">{focusState.detail}</p>
+              <StatusPanel status={focusState.status} className="space-y-3 p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[var(--color-text-muted)]">
+                      {statusLabel(focusState.status)}
+                    </p>
+                    <p className="mt-1 text-lg font-semibold text-[var(--color-text-strong)]">{focusState.title}</p>
+                    <p className="text-sm text-[var(--color-text-muted)]">{focusState.detail}</p>
+                  </div>
+                  <StatusBadge
+                    status={focusState.status}
+                    label={focusState.statusLabel}
+                    showIcon={false}
+                    className="text-[0.6rem]"
+                  />
+                </div>
+                <p className="text-sm text-[var(--color-text-muted)]">{focusState.helper}</p>
                 {focusState.action ? (
-                  <Button asChild size="sm" variant="ghost" className="mt-3">
+                  <Button asChild size="sm" variant="ghost">
                     <Link href={focusState.action.href}>{focusState.action.label}</Link>
                   </Button>
                 ) : null}
-              </StatusTonePanel>
+              </StatusPanel>
             ) : (
               <p className="rounded-2xl border border-dashed border-zinc-300 bg-zinc-50 px-4 py-3 text-sm text-zinc-600 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300">
                 Pick a connection to see a calm summary of its readiness.

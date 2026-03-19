@@ -5,10 +5,11 @@
 ### Completed
 - **Phase 1:** shadcn sidebar adoption + theme toggle moved to persistent top-right header
 - **Phase 2:** design research completed and captured in `DESIGN_AUDIT.md`
-- **Phase 3:** core design-system and hierarchy pass implemented in code (this branch/PR)
+- **Phase 3:** core design-system and hierarchy pass implemented in code
+- **Phase 4:** status semantics and interaction-state unification implemented in code (this branch/PR)
 
 ### Current Gate
-- Awaiting Phase 3 review/merge before starting Phase 4.
+- Awaiting Phase 4 review/merge before starting Phase 5.
 
 ## Phase 3+ Implementation Plan
 

@@ -14,7 +14,6 @@ import {
   Sparkles,
   Sun,
   Timer,
-  TriangleAlert,
   type LucideIcon,
 } from "lucide-react";
 
@@ -27,7 +26,14 @@ import { HomeWidgetId, useClawboardState } from "@/lib/clawboard-state";
 import { EmptyState, ErrorState, LoadingState } from "@/components/ui/async-states";
 import { fetchHomeOverview, HomeOverview } from "@/lib/openclaw-client";
 import { useOpenClawResource } from "@/hooks/use-openclaw-resource";
-import { StatusTonePanel, type StatusTone, statusToneTextClass } from "@/components/ui/status-tone";
+import {
+  StatusBadge,
+  StatusPanel,
+  statusIcon,
+  statusLabel,
+  statusTextClass,
+} from "@/components/ui/status";
+import { mapSignalToneToStatus, type StatusVariant } from "@/lib/status-grammar";
 
 type QuickActionItem = {
   label: string;
@@ -63,12 +69,6 @@ const quickActions: QuickActionItem[] = [
   },
 ];
 
-function signalToneIcon(tone: StatusTone) {
-  if (tone === "good") return CheckCircle2;
-  if (tone === "watch") return TriangleAlert;
-  return CircleDashed;
-}
-
 function renderWidget(id: HomeWidgetId, homeData: HomeOverview) {
   const signals = homeData.signals ?? [];
   const activeJobs = homeData.activeJobs ?? [];
@@ -90,17 +90,24 @@ function renderWidget(id: HomeWidgetId, homeData: HomeOverview) {
           {signals.length ? (
             <div className="grid gap-3 sm:grid-cols-2">
               {signals.map((signal) => {
-                const Icon = signalToneIcon(signal.tone);
+                const signalStatus = mapSignalToneToStatus(signal.tone);
+                const Icon = statusIcon(signalStatus);
                 return (
-                  <StatusTonePanel key={signal.label} tone={signal.tone}>
+                  <StatusPanel key={signal.label} status={signalStatus}>
                     <div className="flex items-center justify-between gap-2">
-                      <p className={`text-xs font-semibold uppercase tracking-[0.3em] ${statusToneTextClass(signal.tone)}`}>
+                      <p className={`text-xs font-semibold uppercase tracking-[0.3em] ${statusTextClass(signalStatus)}`}>
                         {signal.label}
                       </p>
-                      <Icon className={`size-4 ${statusToneTextClass(signal.tone)}`} />
+                      <Icon className={`size-4 ${statusTextClass(signalStatus)}`} aria-hidden="true" />
                     </div>
                     <p className="mt-3 text-2xl font-semibold text-[var(--color-text-strong)]">{signal.value}</p>
-                  </StatusTonePanel>
+                    <StatusBadge
+                      status={signalStatus}
+                      label={statusLabel(signalStatus)}
+                      className="mt-3 w-fit"
+                      showIcon={false}
+                    />
+                  </StatusPanel>
                 );
               })}
             </div>
@@ -314,16 +321,27 @@ export function HomeDashboard() {
     const attentionSignal = signals.find((signal) => signal.tone !== "good");
     const attentionJob = attentionSignal ? null : activeJobs[0];
     const nextSteps = quickActions.slice(0, 3);
-    const focusCue = (() => {
+    type FocusCue = {
+      icon: LucideIcon;
+      title: string;
+      detail: string;
+      helper: string;
+      status: StatusVariant;
+      statusLabel: string;
+    };
+
+    const focusCue: FocusCue = (() => {
       if (attentionSignal) {
+        const signalStatus = mapSignalToneToStatus(attentionSignal.tone);
         return {
-          icon: signalToneIcon(attentionSignal.tone),
+          icon: statusIcon(signalStatus),
           title: attentionSignal.label,
           detail: attentionSignal.value,
           helper:
             attentionSignal.tone === "watch"
               ? "Action recommended soon."
               : "Keep this signal on your radar.",
+          status: signalStatus,
           statusLabel:
             attentionSignal.tone === "watch"
               ? "Action recommended"
@@ -337,6 +355,7 @@ export function HomeDashboard() {
           title: attentionJob.title,
           detail: attentionJob.detail,
           helper: `ETA ${attentionJob.eta}.`,
+          status: "healthy",
           statusLabel: "Job in progress",
         };
       }
@@ -346,30 +365,17 @@ export function HomeDashboard() {
         title: "Steady day",
         detail: "Live data is calm and nothing is flagged for attention.",
         helper: "We will spotlight anything urgent as soon as it appears.",
+        status: "healthy",
         statusLabel: "All clear",
       };
     })();
-    const focusNeedsAttention = Boolean(attentionSignal || attentionJob);
-
     const FocusIcon = focusCue.icon;
     return (
       <div className="space-y-6">
-        <div
-          className={`rounded-2xl border px-5 py-4 ${
-            focusNeedsAttention
-              ? "border-[var(--color-accent-border)] bg-[var(--color-accent-muted)]"
-              : "border-[var(--color-border-default)] bg-[var(--color-surface-muted)]"
-          }`}
-        >
+        <StatusPanel status={focusCue.status} className="space-y-3 px-5 py-4">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <span
-                className={`flex h-10 w-10 items-center justify-center rounded-2xl border text-base ${
-                  focusNeedsAttention
-                    ? "border-[var(--color-accent-border)] bg-[var(--color-accent-muted)] text-[var(--color-accent-foreground)]"
-                    : "border-[var(--color-border-default)] bg-[var(--color-surface-muted)] text-[var(--color-text-muted)]"
-                }`}
-              >
+              <span className="flex h-10 w-10 items-center justify-center rounded-2xl border border-[color-mix(in_srgb,var(--color-border-default)_25%,transparent)] bg-[color-mix(in_srgb,var(--color-surface-muted)_60%,transparent)] text-base text-[var(--color-text-soft)]">
                 <FocusIcon className="size-5" aria-hidden="true" />
               </span>
               <div>
@@ -380,10 +386,10 @@ export function HomeDashboard() {
                 <p className="text-sm text-[var(--color-text-muted)]">{focusCue.detail}</p>
               </div>
             </div>
-            <Badge variant={focusNeedsAttention ? undefined : "muted"}>{focusCue.statusLabel}</Badge>
+            <StatusBadge status={focusCue.status} label={focusCue.statusLabel} showIcon={false} className="whitespace-nowrap" />
           </div>
-          <p className="mt-3 text-sm text-[var(--color-text-muted)]">{focusCue.helper}</p>
-        </div>
+          <p className="text-sm text-[var(--color-text-muted)]">{focusCue.helper}</p>
+        </StatusPanel>
         <div className="grid gap-4 md:grid-cols-3">
           <Card>
             <CardHeader>
@@ -422,31 +428,42 @@ export function HomeDashboard() {
               <CardDescription className="text-base">Signals or jobs that should be on your radar.</CardDescription>
             </CardHeader>
             <CardContent>
-              {attentionSignal ? (
-                <div className="rounded-2xl border border-zinc-200/80 bg-zinc-50/80 p-4 dark:border-zinc-800/80 dark:bg-zinc-900">
-                  <div className="flex items-center gap-3">
-                    <div className="rounded-full border border-zinc-200/80 bg-white p-2 text-zinc-700 dark:border-zinc-700/60 dark:bg-zinc-900">
-                      {(() => {
-                        const Icon = signalToneIcon(attentionSignal.tone);
-                        return <Icon className="size-5 text-zinc-500 dark:text-zinc-300" />;
-                      })()}
+            {attentionSignal ? (
+              (() => {
+                const signalStatus = mapSignalToneToStatus(attentionSignal.tone);
+                const Icon = statusIcon(signalStatus);
+                return (
+                  <div className="rounded-2xl border border-zinc-200/80 bg-zinc-50/80 p-4 dark:border-zinc-800/80 dark:bg-zinc-900">
+                    <div className="flex items-center gap-3">
+                      <div className="rounded-full border border-zinc-200/80 bg-white p-2 text-zinc-700 dark:border-zinc-700/60 dark:bg-zinc-900">
+                        <Icon className={`size-5 ${statusTextClass(signalStatus)}`} aria-hidden="true" />
+                      </div>
+                      <div>
+                        <p className={`text-xs font-semibold uppercase tracking-[0.3em] ${statusTextClass(signalStatus)}`}>
+                          {attentionSignal.label}
+                        </p>
+                        <p className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
+                          {attentionSignal.value}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.3em] text-zinc-500 dark:text-zinc-400">
-                        {attentionSignal.label}
+                    <div className="mt-3 flex items-center justify-between gap-2">
+                      <p className="text-sm text-zinc-600 dark:text-zinc-300">
+                        {attentionSignal.tone === "watch"
+                          ? "Action recommended soon."
+                          : "Keep monitoring this metric."}
                       </p>
-                      <p className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
-                        {attentionSignal.value}
-                      </p>
+                      <StatusBadge
+                        status={signalStatus}
+                        label={attentionSignal.tone === "watch" ? "Action recommended" : "Watch"}
+                        showIcon={false}
+                        className="text-[0.6rem]"
+                      />
                     </div>
                   </div>
-                  <p className="mt-3 text-sm text-zinc-600 dark:text-zinc-300">
-                    {attentionSignal.tone === "watch"
-                      ? "Action recommended soon."
-                      : "Keep monitoring this metric."}
-                  </p>
-                </div>
-              ) : attentionJob ? (
+                );
+              })()
+            ) : attentionJob ? (
                 <div className="rounded-2xl border border-zinc-200/80 bg-zinc-50/80 p-4 dark:border-zinc-800/80 dark:bg-zinc-900">
                   <p className="text-xs font-semibold uppercase tracking-[0.3em] text-zinc-500 dark:text-zinc-400">
                     Job in focus
