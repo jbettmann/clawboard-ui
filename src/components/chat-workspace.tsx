@@ -178,7 +178,7 @@ export function ChatWorkspace() {
 
   if (sessionsStatus === "loading") {
     return (
-      <div className="page-shell">
+      <div className="page-shell" data-density-mode="operations">
         {header}
         <LoadingState title="Loading chat sessions" description="Connecting to OpenClaw sessions…" />
       </div>
@@ -187,7 +187,7 @@ export function ChatWorkspace() {
 
   if (sessionsStatus === "error") {
     return (
-      <div className="page-shell">
+      <div className="page-shell" data-density-mode="operations">
         {header}
         <ErrorState
           title="Unable to load chat sessions"
@@ -204,7 +204,7 @@ export function ChatWorkspace() {
 
   if (!sessions.length) {
     return (
-      <div className="page-shell">
+      <div className="page-shell" data-density-mode="operations">
         {header}
         <EmptyState
           title="No chat sessions yet"
@@ -232,7 +232,7 @@ export function ChatWorkspace() {
     : [];
 
   return (
-    <div className="page-shell">
+    <div className="page-shell" data-density-mode="operations">
       {header}
 
       <div className="grid gap-5 xl:grid-cols-[320px_1fr]">
@@ -258,7 +258,7 @@ export function ChatWorkspace() {
                 onClick={() => setSelectedSessionId(session.id)}
                 aria-pressed={activeSessionId === session.id}
                 aria-label={`Open session ${session.title}`}
-                className={`w-full rounded-xl border p-4 text-left transition-colors ${
+                className={`density-row w-full rounded-xl border text-left transition-colors ${
                   activeSessionId === session.id
                     ? "border-zinc-900 bg-zinc-900 text-zinc-50 dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900"
                     : "border-zinc-200 bg-zinc-50 hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:bg-zinc-800"

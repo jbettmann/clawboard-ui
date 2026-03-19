@@ -16,7 +16,7 @@ export function PageHeader({
   pageActions,
 }: PageHeaderProps) {
   return (
-    <header className="surface-card relative overflow-hidden p-5 sm:p-6 lg:p-7">
+    <header className="surface-card page-header-shell relative overflow-hidden">
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[var(--color-accent-border)] to-transparent" />
       <div className="relative flex flex-col gap-5">
         <div className="relative flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">

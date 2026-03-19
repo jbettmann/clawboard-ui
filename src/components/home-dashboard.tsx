@@ -529,7 +529,7 @@ export function HomeDashboard() {
   })();
 
   return (
-    <div className="page-shell">
+    <div className="page-shell" data-density-mode="overview">
       <PageHeader
         title="Home"
         context="Live OpenClaw context, attention signals, and the next steps you can take."

@@ -258,7 +258,7 @@ export function JobsManagement() {
 
   if (status === "loading") {
     return (
-      <div className="page-shell">
+      <div className="page-shell" data-density-mode="operations">
         {header}
         <LoadingState title="Loading jobs" description="Fetching live scheduler data from OpenClaw…" />
       </div>
@@ -267,7 +267,7 @@ export function JobsManagement() {
 
   if (status === "error") {
     return (
-      <div className="page-shell">
+      <div className="page-shell" data-density-mode="operations">
         {header}
         <ErrorState
           title="Unable to load jobs"
@@ -284,7 +284,7 @@ export function JobsManagement() {
 
   if (!jobs.length) {
     return (
-      <div className="page-shell">
+      <div className="page-shell" data-density-mode="operations">
         {header}
         <EmptyState
           title="No jobs to show"
@@ -300,7 +300,7 @@ export function JobsManagement() {
   }
 
   return (
-    <div className="page-shell">
+    <div className="page-shell" data-density-mode="operations">
       {header}
 
       <section className="grid gap-4 md:grid-cols-3">
@@ -354,7 +354,7 @@ export function JobsManagement() {
                         onClick={() => setSelectedId(job.id)}
                         aria-pressed={selectedId === job.id}
                         aria-label={`View job ${job.name}`}
-                        className={`w-full rounded-xl border p-3 text-left transition-colors ${
+                        className={`density-row w-full rounded-xl border text-left transition-colors ${
                           selectedId === job.id
                             ? "border-zinc-900 bg-zinc-900 text-zinc-50 dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900"
                             : "border-zinc-200 bg-zinc-50 hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:bg-zinc-800"
@@ -390,7 +390,7 @@ export function JobsManagement() {
                       onClick={() => setSelectedId(job.id)}
                       aria-pressed={selectedId === job.id}
                       aria-label={`View job ${job.name}`}
-                      className={`w-full rounded-xl border p-3 text-left transition-colors ${
+                      className={`density-row w-full rounded-xl border text-left transition-colors ${
                         selectedId === job.id
                           ? "border-zinc-900 bg-zinc-900 text-zinc-50 dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900"
                           : "border-zinc-200 bg-zinc-50 hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:bg-zinc-800"

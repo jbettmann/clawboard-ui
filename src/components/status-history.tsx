@@ -225,7 +225,7 @@ export function StatusHistory() {
   const digestLines = timeline.slice(0, 3).map((event) => `${event.time} — ${event.title}`);
 
   return (
-    <div className="page-shell">
+    <div className="page-shell" data-density-mode="settings">
       <PageHeader
         title="Status & history"
         context="Live health snapshots, calm activity timeline, and digestible context from OpenClaw."
