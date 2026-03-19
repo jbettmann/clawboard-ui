@@ -12,6 +12,12 @@ export type HomeWidgetPreference = {
   visible: boolean;
 };
 
+export type UserSettingKey = "dailyDigest" | "highlightSignals";
+export type WorkspaceSettingKey = "autoRefresh" | "shareWorkspaceSignals";
+
+export type UserSettings = Record<UserSettingKey, boolean>;
+export type WorkspaceSettings = Record<WorkspaceSettingKey, boolean>;
+
 type ClawboardStateValue = {
   outputs: OutputItem[];
   selectedOutputId: string | null;
@@ -24,6 +30,11 @@ type ClawboardStateValue = {
   toggleOutputSaved: (id: string) => void;
   moveWidget: (id: HomeWidgetId, direction: "up" | "down") => void;
   toggleWidgetVisibility: (id: HomeWidgetId) => void;
+  resetWidgetPreferences: () => void;
+  userSettings: UserSettings;
+  workspaceSettings: WorkspaceSettings;
+  toggleUserSetting: (key: UserSettingKey) => void;
+  toggleWorkspaceSetting: (key: WorkspaceSettingKey) => void;
 };
 
 const DEFAULT_WIDGET_PREFERENCES: HomeWidgetPreference[] = [
@@ -32,6 +43,16 @@ const DEFAULT_WIDGET_PREFERENCES: HomeWidgetPreference[] = [
   { id: "active-jobs", label: "Active jobs", visible: true },
   { id: "pinned-outputs", label: "Pinned outputs", visible: true },
 ];
+
+const DEFAULT_USER_SETTINGS: UserSettings = {
+  dailyDigest: true,
+  highlightSignals: true,
+};
+
+const DEFAULT_WORKSPACE_SETTINGS: WorkspaceSettings = {
+  autoRefresh: true,
+  shareWorkspaceSignals: false,
+};
 
 const STORAGE_KEY = "clawboard-ui-state-v1";
 
@@ -43,6 +64,8 @@ function loadStoredState() {
       selectedOutputId: null,
       widgetPreferences: DEFAULT_WIDGET_PREFERENCES,
       outputPreferences: {} as Record<string, { pinned?: boolean; saved?: boolean }>,
+      userSettings: DEFAULT_USER_SETTINGS,
+      workspaceSettings: DEFAULT_WORKSPACE_SETTINGS,
     };
   }
 
@@ -53,6 +76,8 @@ function loadStoredState() {
         selectedOutputId: null,
         widgetPreferences: DEFAULT_WIDGET_PREFERENCES,
         outputPreferences: {} as Record<string, { pinned?: boolean; saved?: boolean }>,
+        userSettings: DEFAULT_USER_SETTINGS,
+        workspaceSettings: DEFAULT_WORKSPACE_SETTINGS,
       };
     }
 
@@ -60,18 +85,24 @@ function loadStoredState() {
       selectedOutputId?: string;
       widgetPreferences?: HomeWidgetPreference[];
       outputPreferences?: Record<string, { pinned?: boolean; saved?: boolean }>;
+      userSettings?: UserSettings;
+      workspaceSettings?: WorkspaceSettings;
     };
 
     const widgetPreferences = parsed.widgetPreferences?.length ? parsed.widgetPreferences : DEFAULT_WIDGET_PREFERENCES;
     const selectedOutputId = parsed.selectedOutputId ?? null;
     const outputPreferences = parsed.outputPreferences ?? {};
+    const userSettings = { ...DEFAULT_USER_SETTINGS, ...parsed.userSettings };
+    const workspaceSettings = { ...DEFAULT_WORKSPACE_SETTINGS, ...parsed.workspaceSettings };
 
-    return { selectedOutputId, widgetPreferences, outputPreferences };
+    return { selectedOutputId, widgetPreferences, outputPreferences, userSettings, workspaceSettings };
   } catch {
     return {
       selectedOutputId: null,
       widgetPreferences: DEFAULT_WIDGET_PREFERENCES,
       outputPreferences: {} as Record<string, { pinned?: boolean; saved?: boolean }>,
+      userSettings: DEFAULT_USER_SETTINGS,
+      workspaceSettings: DEFAULT_WORKSPACE_SETTINGS,
     };
   }
 }
@@ -84,6 +115,8 @@ export function ClawboardStateProvider({ children }: { children: React.ReactNode
   const [outputPreferences, setOutputPreferences] = useState<Record<string, { pinned?: boolean; saved?: boolean }>>(
     storedState.outputPreferences,
   );
+  const [userSettings, setUserSettings] = useState<UserSettings>(storedState.userSettings);
+  const [workspaceSettings, setWorkspaceSettings] = useState<WorkspaceSettings>(storedState.workspaceSettings);
   const outputPreferencesRef = useRef(outputPreferences);
   const [outputsLoading, setOutputsLoading] = useState(true);
   const [outputsError, setOutputsError] = useState<string | null>(null);
@@ -154,12 +187,18 @@ export function ClawboardStateProvider({ children }: { children: React.ReactNode
     try {
       window.localStorage.setItem(
         STORAGE_KEY,
-        JSON.stringify({ selectedOutputId, widgetPreferences, outputPreferences }),
+        JSON.stringify({
+          selectedOutputId,
+          widgetPreferences,
+          outputPreferences,
+          userSettings,
+          workspaceSettings,
+        }),
       );
     } catch {
       // Ignore storage write failures.
     }
-  }, [selectedOutputId, widgetPreferences, outputPreferences]);
+  }, [selectedOutputId, widgetPreferences, outputPreferences, userSettings, workspaceSettings]);
 
   function toggleOutputPinned(id: string) {
     setOutputs((prev) => {
@@ -212,6 +251,18 @@ export function ClawboardStateProvider({ children }: { children: React.ReactNode
     setWidgetPreferences((prev) => prev.map((item) => (item.id === id ? { ...item, visible: !item.visible } : item)));
   }
 
+  function resetWidgetPreferences() {
+    setWidgetPreferences(DEFAULT_WIDGET_PREFERENCES);
+  }
+
+  function toggleUserSetting(key: UserSettingKey) {
+    setUserSettings((prev) => ({ ...prev, [key]: !prev[key] }));
+  }
+
+  function toggleWorkspaceSetting(key: WorkspaceSettingKey) {
+    setWorkspaceSettings((prev) => ({ ...prev, [key]: !prev[key] }));
+  }
+
   const value = useMemo(
     () => ({
       outputs,
@@ -225,6 +276,11 @@ export function ClawboardStateProvider({ children }: { children: React.ReactNode
       toggleOutputSaved,
       moveWidget,
       toggleWidgetVisibility,
+      resetWidgetPreferences,
+      userSettings,
+      workspaceSettings,
+      toggleUserSetting,
+      toggleWorkspaceSetting,
     }),
     [
       outputs,
@@ -233,6 +289,8 @@ export function ClawboardStateProvider({ children }: { children: React.ReactNode
       outputsLoading,
       outputsError,
       refreshOutputs,
+      userSettings,
+      workspaceSettings,
     ],
   );
 
