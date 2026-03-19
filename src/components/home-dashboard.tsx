@@ -22,7 +22,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PatternCard } from "@/components/ui/pattern-card";
 import { PageHeader } from "@/components/page-header";
+import { ScopeBadge } from "@/components/settings-scope-badge";
 import { HomeWidgetId, useClawboardState } from "@/lib/clawboard-state";
+import { scopeMetadata } from "@/lib/settings-scopes";
 import { EmptyState, ErrorState, LoadingState } from "@/components/ui/async-states";
 import { fetchHomeOverview, HomeOverview } from "@/lib/openclaw-client";
 import { useOpenClawResource } from "@/hooks/use-openclaw-resource";
@@ -68,6 +70,13 @@ const quickActions: QuickActionItem[] = [
     icon: CircleDashed,
   },
 ];
+
+const widgetImpactCopy: Record<HomeWidgetId, string> = {
+  "morning-brief": "Signals stay pinned atop this workspace's home dashboard.",
+  "quick-actions": "Next steps keep their order only on this page until you adjust them again.",
+  "active-jobs": "Job progress cards disappear from this home view but remain available on the Jobs page.",
+  "pinned-outputs": "Pinned references vanish from this home layout without altering the Outputs list.",
+};
 
 function renderWidget(id: HomeWidgetId, homeData: HomeOverview) {
   const signals = homeData.signals ?? [];
@@ -264,7 +273,7 @@ function renderWidget(id: HomeWidgetId, homeData: HomeOverview) {
 }
 
 export function HomeDashboard() {
-  const { widgetPreferences, moveWidget, toggleWidgetVisibility } = useClawboardState();
+  const { widgetPreferences, moveWidget, toggleWidgetVisibility, resetWidgetPreferences } = useClawboardState();
   const customizationRef = useRef<HTMLDivElement | null>(null);
   const visibleWidgets = widgetPreferences.filter((item) => item.visible);
 
@@ -547,65 +556,108 @@ export function HomeDashboard() {
       />
       {homeContent}
       <div ref={customizationRef}>
-        <Card>
+        <PatternCard role="settings">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-xl">
-              <Settings2 className="size-5 text-zinc-500" />
+              <Settings2 className="size-5 text-[var(--color-text-muted)]" />
               Personalize home
             </CardTitle>
-            <CardDescription className="text-base">
+            <CardDescription className="text-base text-[var(--color-text-muted)] flex flex-wrap items-center gap-2">
               Show or hide sections and reorder them so the information you need is front and center.
+              <ScopeBadge scope="page-widget" />
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-2">
-            {widgetPreferences.map((widget, index) => (
-              <div
-                key={widget.id}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900"
-              >
-                <div>
-                  <p className="text-base font-medium text-zinc-900 dark:text-zinc-100">{widget.label}</p>
-                  <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                    {widget.visible ? "Visible on Home" : "Hidden from Home"}
-                  </p>
+          <CardContent className="space-y-4">
+            <div className="rounded-2xl border border-[var(--color-border-default)] bg-[var(--color-surface-muted)] p-4 text-sm text-[var(--color-text-muted)]">
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[var(--color-text-muted)]">
+                Page scope overview
+              </p>
+              <p className="mt-1 text-[var(--color-text-strong)]">
+                {scopeMetadata["page-widget"].description}
+              </p>
+              <p className="mt-2 text-sm text-[var(--color-text-muted)]">
+                Need a workspace or account-wide change?{" "}
+                <Link className="font-semibold text-[var(--color-accent-primary)]" href="/settings">
+                  Open settings
+                </Link>
+                .
+              </p>
+            </div>
+            <div className="space-y-3">
+              {widgetPreferences.map((widget, index) => (
+                <div
+                  key={widget.id}
+                  className="grid gap-3 rounded-2xl border border-[var(--color-border-default)] bg-[var(--color-surface-card)] p-4 md:grid-cols-[1fr_auto]"
+                >
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="text-base font-semibold text-[var(--color-text-strong)]">{widget.label}</p>
+                      <ScopeBadge scope="page-widget" />
+                    </div>
+                    <p className="mt-1 text-sm text-[var(--color-text-muted)]">
+                      Reorder or hide this card for this workspace home dashboard without affecting other views.
+                    </p>
+                    <p className="mt-1 text-xs text-[var(--color-text-muted)]">
+                      Impact: {widgetImpactCopy[widget.id]}
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap items-center justify-end gap-2">
+                    <Button
+                      type="button"
+                      onClick={() => moveWidget(widget.id, "up")}
+                      variant="secondary"
+                      size="icon"
+                      disabled={index === 0}
+                      aria-label={`Move ${widget.label} up`}
+                    >
+                      <ArrowUp className="size-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={() => moveWidget(widget.id, "down")}
+                      variant="secondary"
+                      size="icon"
+                      disabled={index === widgetPreferences.length - 1}
+                      aria-label={`Move ${widget.label} down`}
+                    >
+                      <ArrowDown className="size-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={() => toggleWidgetVisibility(widget.id)}
+                      variant="secondary"
+                      size="sm"
+                      className="h-9 min-w-[5rem]"
+                      aria-pressed={widget.visible}
+                      aria-label={`${widget.visible ? "Hide" : "Show"} ${widget.label}`}
+                    >
+                      {widget.visible ? "Visible" : "Hidden"}
+                    </Button>
+                  </div>
                 </div>
-
-                <div className="flex items-center gap-2">
-                  <Button
-                    type="button"
-                    onClick={() => moveWidget(widget.id, "up")}
-                    variant="secondary"
-                    className="h-10 px-3"
-                    disabled={index === 0}
-                    aria-label={`Move ${widget.label} up`}
-                  >
-                    <ArrowUp className="size-4" />
-                  </Button>
-                  <Button
-                    type="button"
-                    onClick={() => moveWidget(widget.id, "down")}
-                    variant="secondary"
-                    className="h-10 px-3"
-                    disabled={index === widgetPreferences.length - 1}
-                    aria-label={`Move ${widget.label} down`}
-                  >
-                    <ArrowDown className="size-4" />
-                  </Button>
-                  <Button
-                    type="button"
-                    onClick={() => toggleWidgetVisibility(widget.id)}
-                    variant={widget.visible ? "default" : "secondary"}
-                    className="h-10 min-w-24"
-                    aria-pressed={widget.visible}
-                    aria-label={`${widget.visible ? "Hide" : "Show"} ${widget.label}`}
-                  >
-                    {widget.visible ? "Shown" : "Hidden"}
-                  </Button>
-                </div>
+              ))}
+            </div>
+            <div className="rounded-2xl border border-[var(--color-border-default)] bg-[var(--color-surface-muted)] p-4">
+              <div className="flex flex-wrap items-center gap-3">
+                <Button
+                  type="button"
+                  onClick={resetWidgetPreferences}
+                  variant="ghost"
+                  size="sm"
+                  className="h-9 px-3 text-[var(--color-state-risk)]"
+                >
+                  Reset layout
+                </Button>
+                <p className="text-xs text-[var(--color-state-risk)]">
+                  This clears your page-widget choices for the home dashboard.
+                </p>
               </div>
-            ))}
+              <p className="mt-1 text-xs text-[var(--color-text-muted)]">
+                Impact: Restores the default widget order and visibility for this workspace&apos;s home view; other scopes are unaffected.
+              </p>
+            </div>
           </CardContent>
-        </Card>
+        </PatternCard>
       </div>
     </div>
   );

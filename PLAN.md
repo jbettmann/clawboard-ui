@@ -9,7 +9,7 @@
 - **Phase 4:** status semantics and interaction-state unification implemented in code (this branch/PR)
 
 ### Current Gate
-- **Phase 6 — Density tuning by surface type:** in progress in this branch/PR.
+- **Phase 7 — Settings and configuration model cleanup:** completed in this branch/PR.
 
 ## Phase 3+ Implementation Plan
 
