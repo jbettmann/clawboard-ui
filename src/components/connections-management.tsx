@@ -262,7 +262,8 @@ export function ConnectionsManagement() {
     <div className="page-shell" data-density-mode="operations">
       {header}
 
-      <div className="grid gap-5 lg:grid-cols-3">
+      <div className="page-tier-primary space-y-5">
+        <div className="grid gap-5 lg:grid-cols-3">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -282,7 +283,6 @@ export function ConnectionsManagement() {
             ))}
           </CardContent>
         </Card>
-
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle>Connection list</CardTitle>
@@ -315,8 +315,10 @@ export function ConnectionsManagement() {
           </CardContent>
         </Card>
       </div>
+      </div>
 
-      <div className="grid gap-5 xl:grid-cols-[1.15fr_1fr]">
+      <div className="page-tier-secondary space-y-5">
+        <div className="grid gap-5 xl:grid-cols-[1.15fr_1fr]">
         <Card>
           <CardHeader>
             <div className="flex flex-wrap items-center gap-2">
@@ -443,6 +445,7 @@ export function ConnectionsManagement() {
             </div>
           </CardContent>
         </Card>
+      </div>
       </div>
     </div>
   );
