@@ -235,7 +235,8 @@ export function ChatWorkspace() {
     <div className="page-shell" data-density-mode="operations">
       {header}
 
-      <div className="grid gap-5 xl:grid-cols-[320px_1fr]">
+      <div className="page-tier-primary space-y-5">
+        <div className="grid gap-5 xl:grid-cols-[320px_1fr]">
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between gap-3">
@@ -340,6 +341,12 @@ export function ChatWorkspace() {
             </CardContent>
           </Card>
 
+
+        </div>
+      </div>
+      </div>
+
+      <div className="page-tier-secondary space-y-5">
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between gap-3">
@@ -445,7 +452,6 @@ export function ChatWorkspace() {
               </div>
             </CardContent>
           </Card>
-        </div>
       </div>
     </div>
   );
